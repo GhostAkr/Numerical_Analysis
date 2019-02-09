@@ -2,6 +2,7 @@
 #include <iostream>
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    vector<double> startPoint {1, 0};
+    EulerExplicit(func0, startPoint);
     return 0;
 }
