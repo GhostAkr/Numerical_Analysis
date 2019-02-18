@@ -3,6 +3,7 @@
 
 int main() {
     vector<double> startPoint {1, 0};
-    EulerExplicit(func0, startPoint);
+    //EulerExplicit(func0, startPoint);
+    EulerImplicit(func0, startPoint);
     return 0;
 }
