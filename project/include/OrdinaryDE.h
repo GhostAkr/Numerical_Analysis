@@ -17,11 +17,13 @@ using std::vector;
 // Tests
 
 vector<double> func0(vector<double> _point);
+vector<double> func1(vector<double> _point);
 
 // Methods
 
 void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint);
 void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint);
+void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint);
 
 // Linear equations
 
@@ -35,5 +37,7 @@ void matrixPrint(vector<vector<double>> _sourceMatrix);
 vector<double> Newtonsys(vector<double> _func(vector<double>), vector<double> _point, vector<double> _right, double _step);
 vector<double> Newton(vector<double> _func(vector<double>), vector<double> _point, vector<double> _right, double _step);
 vector<vector<double>> Jac(vector<double> _func(vector<double>),vector<double> _point, double _step);
+vector<double> multV(vector<double> v, double a);
+vector<double> vplus(vector<double> v, vector<double> w);
 
 #endif //NUMERICAL_ANALYSIS_ORDINARYDE_H

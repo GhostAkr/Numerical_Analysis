@@ -32,7 +32,7 @@ void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPo
         return;
     }
     double step = 0.01;
-    double maxMesh = 500;
+    double maxMesh = 20;
     //fOut << maxMesh << endl;
     size_t nOfVars = _startPoint.size();
     //cout << nOfVars << endl;
@@ -240,4 +240,65 @@ void matrixPrint(vector<vector<double>> _sourceMatrix) {
         cout << endl;
     }
     cout << endl;
+}
+
+vector<double> func1(vector<double> _point) {
+    if (_point.size() != 2) {  // Exception
+        cout << "Incorrect point" << endl;
+        return {};
+    }
+    vector<double> result(2);
+    result[0] = 2 * _point[0] + _point[1] * _point[1] - 1;
+    result[1] = 6 * _point[0] - _point[1] * _point[1] + 1;
+    return result;
+}
+
+void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint) {
+    std::ofstream fOut("../data/solution.dat");
+    if (!fOut) {  // Exception
+        cout << "Error while opening file" << endl;
+        return;
+    }
+
+    double step = 0.01;
+    double maxMesh = 50;
+    size_t nOfVars = _startPoint.size();
+    vector<double> k1, k2, k3, k4;
+    vector<double> p2, p3, p4;
+    vector<double> K(nOfVars);
+    for (int i = 1; i < maxMesh; ++i) {
+        vector<double> point(nOfVars);
+        k1 = _func(_startPoint);
+        p2 = vplus(_startPoint, multV(k1, step / 2));
+        k2 = _func(p2);
+        p3 = vplus(_startPoint, multV(k2, step / 2));
+        k3 = _func(p3);
+        p4 = vplus(_startPoint, multV(k3, step));
+        k4 = _func(p4);
+
+        for (int j = 0; j < nOfVars; ++j) {
+            K[j] = (k1[j] + 2*k2[j] + 2*k3[j] + k4[j]) / 6;
+            point[j] = _startPoint[j] + step * K[j];
+            fOut << point[j] << " ";
+        }
+        //vectorPrint(K);
+        fOut << endl;
+        _startPoint = point;
+    }
+}
+
+vector<double> multV(vector<double> v, double a) {
+    vector<double> res(v.size());
+    for (int i = 0; i < v.size(); i++) {
+        res[i] = v[i] * a;
+    }
+    return res;
+}
+
+vector<double> vplus(vector<double> v, vector<double> w) {
+    vector<double> res(v.size());
+    for (int i = 0; i < v.size(); i++) {
+        res[i] = v[i] + w[i];
+    }
+    return res;
 }
