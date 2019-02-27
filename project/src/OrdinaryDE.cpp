@@ -425,3 +425,41 @@ vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<dou
     return point;
 }
 
+void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint) {
+    std::ofstream fOut("../data/solution.dat");
+    if (!fOut) {  // Exception
+        cout << "Error while opening file" << endl;
+        return;
+    }
+
+    double step = 0.01;
+    double maxMesh = 120;
+    size_t nOfVars = _startPoint.size();
+    vector<double> f1, f2, f3, f4;
+    vector<double> p2(nOfVars);
+    for (int i = 1; i < maxMesh; ++i) {
+        vector<double> point(nOfVars);
+        f1 = _func(_startPoint);
+        _startPoint = RungeKuttaReturn(_func, _startPoint);
+        f2 = _func(_startPoint);
+        _startPoint = RungeKuttaReturn(_func, _startPoint);
+        f3 = _func(_startPoint);
+        _startPoint = RungeKuttaReturn(_func, _startPoint);
+        f4 = _func(_startPoint);
+
+        for (int j = 0; j < nOfVars; ++j) {
+            p2[j] = _startPoint[j] + (step / 24)*(55 * f4[j] - 59 * f3[j] + 37 * f2[j] - 9 * f1[j]);
+        }
+
+        f1 = _func(p2);
+
+        for (int j = 0; j < nOfVars; ++j) {
+
+            point[j] = _startPoint[j] + (step / 24)*(9 * f1[j] + 19 * f4[j] - 5 * f3[j] + f2[j]);
+            fOut << point[j] << " ";
+        }
+        fOut << endl;
+        _startPoint = point;
+    }
+}
+

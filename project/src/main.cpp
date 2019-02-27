@@ -7,6 +7,7 @@ int main() {
     //EulerImplicit(func1, startPoint);
     //RungeKutta(func0, startPoint);
     //Symmetric(func0, startPoint);
-    AdamsBashfort(func0, startPoint);
+    //AdamsBashfort(func0, startPoint);
+    PredCorr(func0, startPoint);
     return 0;
 }

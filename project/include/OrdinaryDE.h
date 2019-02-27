@@ -26,6 +26,7 @@ void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPo
 void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint);
 void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint);
 void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint);
+void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint);
 
 // Linear equations
 
