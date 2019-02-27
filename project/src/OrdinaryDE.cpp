@@ -18,6 +18,17 @@ vector<double> func0(vector<double> _point) {
     return result;
 }
 
+vector<double> func1(vector<double> _point) {
+    if (_point.size() != 2) {  // Exception
+        cout << "Incorrect point" << endl;
+        return {};
+    }
+    vector<double> result(2);
+    result[0] = 2 * _point[0] + _point[1] * _point[1] - 1;
+    result[1] = 6 * _point[0] - _point[1] * _point[1] + 1;
+    return result;
+}
+
 void vectorPrint(vector<double> _sourceVector) {
     for (int i = 0; i < _sourceVector.size(); ++i) {
         cout << _sourceVector[i] << endl;
@@ -32,7 +43,7 @@ void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPo
         return;
     }
     double step = 0.01;
-    double maxMesh = 20;
+    double maxMesh = 200;
     //fOut << maxMesh << endl;
     size_t nOfVars = _startPoint.size();
     //cout << nOfVars << endl;
@@ -105,7 +116,7 @@ void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPo
         return;
     }
     double step = 0.01;
-    double maxMesh = 1000;
+    double maxMesh = 200;
     //fOut << maxMesh << endl;
     size_t nOfVars = _startPoint.size();
     //cout << nOfVars << endl;
@@ -242,30 +253,19 @@ void matrixPrint(vector<vector<double>> _sourceMatrix) {
     cout << endl;
 }
 
-vector<double> func1(vector<double> _point) {
-    if (_point.size() != 2) {  // Exception
-        cout << "Incorrect point" << endl;
-        return {};
-    }
-    vector<double> result(2);
-    result[0] = 2 * _point[0] + _point[1] * _point[1] - 1;
-    result[1] = 6 * _point[0] - _point[1] * _point[1] + 1;
-    return result;
-}
-
 void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint) {
     std::ofstream fOut("../data/solution.dat");
     if (!fOut) {  // Exception
         cout << "Error while opening file" << endl;
         return;
     }
-
-    double step = 0.01;
-    double maxMesh = 50;
+    double step = 0.0001;
+    double maxMesh = 200;
     size_t nOfVars = _startPoint.size();
     vector<double> k1, k2, k3, k4;
     vector<double> p2, p3, p4;
     vector<double> K(nOfVars);
+    vector<double> error;
     for (int i = 1; i < maxMesh; ++i) {
         vector<double> point(nOfVars);
         k1 = _func(_startPoint);
@@ -275,16 +275,18 @@ void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint
         k3 = _func(p3);
         p4 = vplus(_startPoint, multV(k3, step));
         k4 = _func(p4);
-
         for (int j = 0; j < nOfVars; ++j) {
             K[j] = (k1[j] + 2*k2[j] + 2*k3[j] + k4[j]) / 6;
             point[j] = _startPoint[j] + step * K[j];
             fOut << point[j] << " ";
         }
+        error.push_back(normInfVect(vminus(point, real0(step, i))));
+        cout << "Error = " << normInfVect(vminus(point, real0(step, i))) << endl;
         //vectorPrint(K);
         fOut << endl;
         _startPoint = point;
     }
+    cout << "The final one is " << normInfVect(error) << endl;
 }
 
 vector<double> multV(vector<double> v, double a) {
@@ -302,3 +304,124 @@ vector<double> vplus(vector<double> v, vector<double> w) {
     }
     return res;
 }
+
+vector<double> vminus(vector<double> v, vector<double> w) {
+    vector<double> res(v.size());
+    for (int i = 0; i < v.size(); i++) {
+        res[i] = v[i] - w[i];
+    }
+    return res;
+}
+
+double normInfVect(vector<double> _vect) {
+    double max = -1.0;
+    size_t rows = _vect.size();
+    for (int i = 0; i < rows; ++i) {
+        if (fabs(_vect[i]) > max) {
+            max = fabs(_vect[i]);
+        }
+    }
+    return max;
+}
+
+vector<double> real0(double _step, int _iteration) {
+    double k = 20.0;
+    double m = 0.3;
+    double omega = sqrt(k / m);
+    vector<double> result (2);
+    double t = _step * _iteration;
+    result[0] = cos(omega * t);
+    result[1] = -omega * sin(omega * t);
+    return result;
+}
+void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint) {
+    std::ofstream fOut("../data/solution.dat");
+    if (!fOut) {  // Exception
+        cout << "Error while opening file" << endl;
+        return;
+    }
+    double step = 0.01;
+    double maxMesh = 200;
+    //fOut << maxMesh << endl;
+    size_t nOfVars = _startPoint.size();
+    //cout << nOfVars << endl;
+    vector<double> p(nOfVars, 0);
+    vector<double> error;
+    for (int i = 1; i < maxMesh; ++i) {
+        vector<double> point(nOfVars);
+        vector<double> f = _func(_startPoint);
+        for (int i = 0; i < nOfVars; ++i) {
+            _startPoint[i] += step * f[i];
+        }
+        point = Newton(_func, p, _startPoint, step);
+        error.push_back(normInfVect(vminus(point, real0(step, i))));
+        cout << "Error = " << normInfVect(vminus(point, real0(step, i))) << endl;
+        for (int j = 0; j < nOfVars; ++j) {
+            fOut << point[j] << " ";
+        }
+        fOut << endl;
+        _startPoint = point;
+    }
+    cout << "The final one is " << normInfVect(error) << endl;
+}
+
+void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint) {
+    std::ofstream fOut("../data/solution.dat");
+    if (!fOut) {  // Exception
+        cout << "Error while opening file" << endl;
+        return;
+    }
+    double step = 0.01;
+    double maxMesh = 200;
+    int order = 4;
+    size_t nOfVars = _startPoint.size();
+    vector<vector<double>> prevValues (order, vector<double>());
+    // Calculating of first points
+    prevValues[0] = _func(_startPoint);
+    vector<double> currentPoint = _startPoint;
+    for (int i = 1; i < order; ++i) {
+        currentPoint = RungeKuttaReturn(func0, currentPoint);
+        for (int j = 0; j < nOfVars; ++j) {
+            fOut << currentPoint[j] << " ";
+        }
+        fOut << endl;
+        prevValues[i] = _func(currentPoint);
+    }
+    for (int i = 1; i < maxMesh; ++i) {
+        vector<double> point(nOfVars);
+        for (int j = 0; j < nOfVars; ++j) {
+            point[j] = currentPoint[j] + step / 24.0 * (55.0 * prevValues[3][j] - 59.0 * prevValues[2][j] + \
+                    37.0 * prevValues[1][j] - 9.0 * prevValues[0][j]);
+            fOut << point[j] << " ";
+        }
+        // Updating previous points
+        for (int j = 0; j < 3; ++j) {
+            prevValues[j] = prevValues[j + 1];
+        }
+        prevValues[3] = _func(point);
+        fOut << endl;
+        currentPoint = point;
+    }
+}
+
+vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<double> _startPoint) {
+    double step = 0.0001;
+    size_t nOfVars = _startPoint.size();
+    vector<double> k1, k2, k3, k4;
+    vector<double> p2, p3, p4;
+    vector<double> K(nOfVars);
+    vector<double> point(nOfVars);
+    k1 = _func(_startPoint);
+    p2 = vplus(_startPoint, multV(k1, step / 2));
+    k2 = _func(p2);
+    p3 = vplus(_startPoint, multV(k2, step / 2));
+    k3 = _func(p3);
+    p4 = vplus(_startPoint, multV(k3, step));
+    k4 = _func(p4);
+    for (int j = 0; j < nOfVars; ++j) {
+        K[j] = (k1[j] + 2*k2[j] + 2*k3[j] + k4[j]) / 6;
+        point[j] = _startPoint[j] + step * K[j];
+    }
+    return point;
+}
+

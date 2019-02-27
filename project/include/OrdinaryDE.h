@@ -24,11 +24,17 @@ vector<double> func1(vector<double> _point);
 void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint);
 void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint);
 void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint);
+void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint);
+void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint);
 
 // Linear equations
 
 vector<double> gaussLinearSolve(vector<vector<double>> _A);
 int mainElement(vector<vector<double>> _sourceColumn, int _row);
+
+// Real solutions
+
+vector<double> real0(double _step, int _iteration);
 
 // Other
 
@@ -39,5 +45,12 @@ vector<double> Newton(vector<double> _func(vector<double>), vector<double> _poin
 vector<vector<double>> Jac(vector<double> _func(vector<double>),vector<double> _point, double _step);
 vector<double> multV(vector<double> v, double a);
 vector<double> vplus(vector<double> v, vector<double> w);
+vector<double> vminus(vector<double> v, vector<double> w);
+double error(vector<double> _realSolution, vector<double> _apprSolution);
+double normInfVect(vector<double> _vect);
+
+// Doubt functions
+
+vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<double> _startPoint);
 
 #endif //NUMERICAL_ANALYSIS_ORDINARYDE_H
