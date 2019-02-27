@@ -29,6 +29,18 @@ vector<double> func1(vector<double> _point) {
     return result;
 }
 
+vector<double> funcOwn(vector<double> _point) {
+    if (_point.size() != 2) {  // Exception
+        cout << "Incorrect point" << endl;
+        return {};
+    }
+    double mu = 0.5;
+    vector<double> result(2);
+    result[0] = _point[1];
+    result[1] = mu * (1 - _point[0] * _point[0]) * _point[1] - _point[0];
+    return result;
+}
+
 void vectorPrint(vector<double> _sourceVector) {
     for (int i = 0; i < _sourceVector.size(); ++i) {
         cout << _sourceVector[i] << endl;
@@ -259,8 +271,8 @@ void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint
         cout << "Error while opening file" << endl;
         return;
     }
-    double step = 0.0001;
-    double maxMesh = 200;
+    double step = STEP;
+    double maxMesh = 20000;
     size_t nOfVars = _startPoint.size();
     vector<double> k1, k2, k3, k4;
     vector<double> p2, p3, p4;
@@ -281,12 +293,12 @@ void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint
             fOut << point[j] << " ";
         }
         error.push_back(normInfVect(vminus(point, real0(step, i))));
-        cout << "Error = " << normInfVect(vminus(point, real0(step, i))) << endl;
+        //cout << "Error = " << normInfVect(vminus(point, real0(step, i))) << endl;
         //vectorPrint(K);
         fOut << endl;
         _startPoint = point;
     }
-    cout << "The final one is " << normInfVect(error) << endl;
+    cout << "Error is " << normInfVect(error) << endl;
 }
 
 vector<double> multV(vector<double> v, double a) {
@@ -325,6 +337,7 @@ double normInfVect(vector<double> _vect) {
 }
 
 vector<double> real0(double _step, int _iteration) {
+    _iteration;
     double k = 20.0;
     double m = 0.3;
     double omega = sqrt(k / m);
@@ -334,6 +347,7 @@ vector<double> real0(double _step, int _iteration) {
     result[1] = -omega * sin(omega * t);
     return result;
 }
+
 void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint) {
     std::ofstream fOut("../data/solution.dat");
     if (!fOut) {  // Exception
@@ -355,14 +369,14 @@ void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint)
         }
         point = Newton(_func, p, _startPoint, step);
         error.push_back(normInfVect(vminus(point, real0(step, i))));
-        cout << "Error = " << normInfVect(vminus(point, real0(step, i))) << endl;
+        //cout << "Error = " << normInfVect(vminus(point, real0(step, i))) << endl;
         for (int j = 0; j < nOfVars; ++j) {
             fOut << point[j] << " ";
         }
         fOut << endl;
         _startPoint = point;
     }
-    cout << "The final one is " << normInfVect(error) << endl;
+    cout << "Error is " << normInfVect(error) << endl;
 }
 
 void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint) {
@@ -371,8 +385,8 @@ void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPo
         cout << "Error while opening file" << endl;
         return;
     }
-    double step = 0.01;
-    double maxMesh = 200;
+    double step = STEP;
+    double maxMesh = 2000;
     int order = 4;
     size_t nOfVars = _startPoint.size();
     vector<vector<double>> prevValues (order, vector<double>());
@@ -387,6 +401,7 @@ void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPo
         fOut << endl;
         prevValues[i] = _func(currentPoint);
     }
+    vector<double> error;
     for (int i = 1; i < maxMesh; ++i) {
         vector<double> point(nOfVars);
         for (int j = 0; j < nOfVars; ++j) {
@@ -394,6 +409,7 @@ void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPo
                     37.0 * prevValues[1][j] - 9.0 * prevValues[0][j]);
             fOut << point[j] << " ";
         }
+        error.push_back(normInfVect(vminus(point, real0(step, i))));
         // Updating previous points
         for (int j = 0; j < 3; ++j) {
             prevValues[j] = prevValues[j + 1];
@@ -402,10 +418,11 @@ void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPo
         fOut << endl;
         currentPoint = point;
     }
+    cout << "Error is " << normInfVect(error) << endl;
 }
 
 vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<double> _startPoint) {
-    double step = 0.0001;
+    double step = STEP;
     size_t nOfVars = _startPoint.size();
     vector<double> k1, k2, k3, k4;
     vector<double> p2, p3, p4;
@@ -431,35 +448,37 @@ void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint) 
         cout << "Error while opening file" << endl;
         return;
     }
-
     double step = 0.01;
     double maxMesh = 120;
     size_t nOfVars = _startPoint.size();
     vector<double> f1, f2, f3, f4;
     vector<double> p2(nOfVars);
+    vector<double> point(nOfVars);
+    f1 = _func(_startPoint);
+    _startPoint = RungeKuttaReturn(_func, _startPoint);
+    f2 = _func(_startPoint);
+    _startPoint = RungeKuttaReturn(_func, _startPoint);
+    f3 = _func(_startPoint);
+    _startPoint = RungeKuttaReturn(_func, _startPoint);
+    f4 = _func(_startPoint);
+    vector<double> error;
     for (int i = 1; i < maxMesh; ++i) {
-        vector<double> point(nOfVars);
-        f1 = _func(_startPoint);
-        _startPoint = RungeKuttaReturn(_func, _startPoint);
-        f2 = _func(_startPoint);
-        _startPoint = RungeKuttaReturn(_func, _startPoint);
-        f3 = _func(_startPoint);
-        _startPoint = RungeKuttaReturn(_func, _startPoint);
-        f4 = _func(_startPoint);
-
         for (int j = 0; j < nOfVars; ++j) {
             p2[j] = _startPoint[j] + (step / 24)*(55 * f4[j] - 59 * f3[j] + 37 * f2[j] - 9 * f1[j]);
         }
-
         f1 = _func(p2);
-
         for (int j = 0; j < nOfVars; ++j) {
-
             point[j] = _startPoint[j] + (step / 24)*(9 * f1[j] + 19 * f4[j] - 5 * f3[j] + f2[j]);
             fOut << point[j] << " ";
         }
+        error.push_back(normInfVect(vminus(point, real0(step, i))));
         fOut << endl;
         _startPoint = point;
+        f1 = f2;
+        f2 = f3;
+        f3 = f4;
+        f4 = _func(_startPoint);
     }
+    cout << "Error is " << normInfVect(error) << endl;
 }
 
