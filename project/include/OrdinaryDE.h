@@ -5,7 +5,7 @@
 #ifndef NUMERICAL_ANALYSIS_ORDINARYDE_H
 #define NUMERICAL_ANALYSIS_ORDINARYDE_H
 
-#define STEP 0.0005
+#define STEP 0.000125
 
 #include <iostream>
 #include <vector>

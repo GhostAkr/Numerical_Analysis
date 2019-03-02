@@ -371,22 +371,23 @@ void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPo
         return;
     }
     double step = STEP;
-    double maxMesh = 200;
+    double maxMesh = 1600;
     int order = 4;
     size_t nOfVars = _startPoint.size();
     vector<vector<double>> prevValues (order, vector<double>());
     // Calculating of first points
+    vector<double> error;
     prevValues[0] = _func(_startPoint);
     vector<double> currentPoint = _startPoint;
     for (int i = 1; i < order; ++i) {
         currentPoint = RungeKuttaReturn(func0, currentPoint);
+        error.push_back(normInfVect(vminus(currentPoint, real0(step, i))));
         for (int j = 0; j < nOfVars; ++j) {
             fOut << currentPoint[j] << " ";
         }
         fOut << endl;
         prevValues[i] = _func(currentPoint);
     }
-    vector<double> error;
     for (int i = 1; i < maxMesh; ++i) {
         vector<double> point(nOfVars);
         for (int j = 0; j < nOfVars; ++j) {
@@ -394,7 +395,7 @@ void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPo
                     37.0 * prevValues[1][j] - 9.0 * prevValues[0][j]);
             fOut << point[j] << " ";
         }
-        error.push_back(normInfVect(vminus(point, real0(step, i))));
+        error.push_back(normInfVect(vminus(point, real0(step, i + 3))));
         // Updating previous points
         for (int j = 0; j < 3; ++j) {
             prevValues[j] = prevValues[j + 1];
@@ -434,19 +435,22 @@ void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint) 
         return;
     }
     double step = STEP;
-    double maxMesh = 800;
+    double maxMesh = 1600;
     size_t nOfVars = _startPoint.size();
     vector<double> f1, f2, f3, f4;
     vector<double> p2(nOfVars);
     vector<double> point(nOfVars);
+    vector<double> error;
     f1 = _func(_startPoint);
     _startPoint = RungeKuttaReturn(_func, _startPoint);
+    error.push_back(normInfVect(vminus(_startPoint, real0(step, 1))));
     f2 = _func(_startPoint);
     _startPoint = RungeKuttaReturn(_func, _startPoint);
+    error.push_back(normInfVect(vminus(_startPoint, real0(step, 2))));
     f3 = _func(_startPoint);
     _startPoint = RungeKuttaReturn(_func, _startPoint);
+    error.push_back(normInfVect(vminus(_startPoint, real0(step, 3))));
     f4 = _func(_startPoint);
-    vector<double> error;
     for (int i = 1; i < maxMesh; ++i) {
         for (int j = 0; j < nOfVars; ++j) {
             p2[j] = _startPoint[j] + (step / 24)*(55 * f4[j] - 59 * f3[j] + 37 * f2[j] - 9 * f1[j]);
@@ -456,7 +460,7 @@ void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint) 
             point[j] = _startPoint[j] + (step / 24)*(9 * f1[j] + 19 * f4[j] - 5 * f3[j] + f2[j]);
             fOut << point[j] << " ";
         }
-        error.push_back(normInfVect(vminus(point, real0(step, i))));
+        error.push_back(normInfVect(vminus(point, real0(step, i + 3))));
         fOut << endl;
         _startPoint = point;
         f1 = f2;
