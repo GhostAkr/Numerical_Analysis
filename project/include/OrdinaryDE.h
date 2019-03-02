@@ -5,7 +5,7 @@
 #ifndef NUMERICAL_ANALYSIS_ORDINARYDE_H
 #define NUMERICAL_ANALYSIS_ORDINARYDE_H
 
-#define STEP 0.000125
+#define STEP 0.0005
 
 #include <iostream>
 #include <vector>
@@ -20,6 +20,9 @@ using std::vector;
 
 vector<double> func0(vector<double> _point);
 vector<double> func1(vector<double> _point);
+vector<double> func2(vector<double> _point);
+vector<double> func3(vector<double> _point);
+vector<double> funcVar1(vector<double> _point);
 vector<double> funcOwn(vector<double> _point);
 
 // Methods

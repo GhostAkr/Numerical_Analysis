@@ -29,15 +29,59 @@ vector<double> func1(vector<double> _point) {
     return result;
 }
 
+vector<double> func2(vector<double> _point) {
+    if (_point.size() != 2) {  // Exception
+        cout << "Incorrect point" << endl;
+        return {};
+    }
+    vector<double> result(2);
+    result[0] = 1 - _point[0] * _point[0] - _point[1] * _point[1];
+    result[1] = 2 * _point[0];
+    return result;
+}
+vector<double> func3(vector<double> _point) {
+    if (_point.size() != 3) {  // Exception
+        cout << "Incorrect point" << endl;
+        return {};
+    }
+    double sigma = 10.0;
+    double r = 28.0;
+    double b = 8.0 / 3.0;
+    vector<double> result(3);
+    result[0] = sigma * (_point[1] - _point[0]);
+    result[1] = _point[0] * (r - _point[2]) - _point[1];
+    result[2] = _point[0] * _point[1] - b * _point[2];
+    return result;
+}
+
+vector<double> funcVar1(vector<double> _point) {
+    if (_point.size() != 2) {  // Exception
+        cout << "Incorrect point" << endl;
+        return {};
+    }
+    double delta = 0.3;
+    double omega = 1.0;
+    double alpha = 1.0;
+    double mu = 2 * delta;
+    vector<double> result(2);
+    result[0] = _point[1];
+    result[1] = mu * (1 - alpha * _point[0] * _point[0]) * _point[1] - omega * omega * _point[0];
+    return result;
+}
+
 vector<double> funcOwn(vector<double> _point) {
     if (_point.size() != 2) {  // Exception
         cout << "Incorrect point" << endl;
         return {};
     }
-    double mu = 0.5;
+    double k = 52;
+    double alpha = 7.9;
+    double P = 0.4;
+    double S = 0.01;
+    double u0 = 273.0;
     vector<double> result(2);
     result[0] = _point[1];
-    result[1] = mu * (1 - _point[0] * _point[0]) * _point[1] - _point[0];
+    result[1] = _point[0] * P * alpha / S / k - u0 * P * alpha / S / k;
     return result;
 }
 
@@ -54,11 +98,12 @@ void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPo
         cout << "Error while opening file" << endl;
         return;
     }
-    double step = 0.01;
+    double step = STEP;
     double maxMesh = 200;
     //fOut << maxMesh << endl;
     size_t nOfVars = _startPoint.size();
     //cout << nOfVars << endl;
+    vector<double> error;
     for (int i = 1; i < maxMesh; ++i) {
         vector<double> point(nOfVars);
         vector<double> f = _func(_startPoint);
@@ -66,60 +111,12 @@ void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPo
             point[j] = _startPoint[j] + step * f[j];
             fOut << point[j] << " ";
         }
+        error.push_back(normInfVect(vminus(point, real0(step, i))));
         fOut << endl;
         _startPoint = point;
     }
+    cout << "Error is " << normInfVect(error) << endl;
 }
-
-//vector<vector<double>> Jac(vector<double> _func(vector<double>), vector<double> _point, vector<double> _right, double _step) {
-//    vector<vector<double>> res(2, vector<double>(2));
-//    double t = 0.00001;
-//    vector<double> p1 = _point;
-//    p1[0] += t;
-//    vector<double> p2 = _point;
-//    p2[1] += t;
-//    vector<double> f1(2);
-//    vector<double> f2(2);
-//    vector<double> f3(2);
-//    f1 = _func(p1);
-//    f2 = _func(p2);
-//    f3 = _func(_point);
-//    //f3[0] -= -_right[0];
-//    //f3[1] -= -_right[1];
-//    res[0][0] = 1 - _step * (f1[0] - f3[0]) / t;
-//    res[0][1] = -_step * (f2[0] - f3[0]) / t;
-//    res[1][0] = -_step * (f1[1] - f3[1]) / t;
-//    res[1][1] = 1 - _step * (f2[1] - f3[1]) / t;
-//
-//    return res;
-//}
-
-//vector<double> Newtonsys(vector<double> _func(vector<double>), vector<double> _point, vector<double> _right, double _step) {
-//    vector<double> res(2);
-//    vector<vector<double>> J;
-//    vector<double> f(2);
-//    double div = 0.0, norm = 0.0;
-//    double eps = 0.001;
-//    int iteration = 0;
-//    do {
-//        J = Jac(_func, _point, _right, _step);
-//        div = 1 / (J[0][0] * J[1][1] - J[1][0] * J[0][1]);
-//        f = _func(_point);
-//        res[0] = _point[0] - div * (J[1][1] * (_point[0] -_step * f[0] - _right[0]) - J[0][1] * (_point[1] -_step * f[1] - _right[1]));
-//        res[1] = _point[1] - div * (J[1][0] * (_point[0] -_step * f[0] - _right[0]) - J[0][0] * (_point[1] -_step * f[1] - _right[1]));
-//        norm = sqrt((res[0] - _point[0])*(res[0] - _point[0]) + (res[1] - _point[1])*(res[1] - _point[1]));
-//        iteration++;
-//        _point[0] = res[0];
-//        _point[1] = res[1];
-//        if (iteration > 100) {
-//            cout << "To many iterations " << endl;
-//            vectorPrint(res);
-//            break;
-//        }
-//    } while (norm > eps);
-//
-//    return res;
-//}
 
 void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint) {
     std::ofstream fOut("../data/solution.dat");
@@ -127,23 +124,22 @@ void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPo
         cout << "Error while opening file" << endl;
         return;
     }
-    double step = 0.01;
-    double maxMesh = 200;
-    //fOut << maxMesh << endl;
+    double step = STEP;
+    double maxMesh = 400;
     size_t nOfVars = _startPoint.size();
-    //cout << nOfVars << endl;
     vector<double> p(nOfVars, 0);
-    p[0] = 0.9934;
-    p[1] = -0.6623;
+    vector<double> error;
     for (int i = 1; i < maxMesh; ++i) {
         vector<double> point(nOfVars);
         point = Newton(_func, p, _startPoint, step);
         for (int j = 0; j < nOfVars; ++j) {
             fOut << point[j] << " ";
         }
+        error.push_back(normInfVect(vminus(point, real0(step, i))));
         fOut << endl;
         _startPoint = point;
     }
+    cout << "Error is " << normInfVect(error) << endl;
 }
 
 vector<double> gaussLinearSolve(vector<vector<double>> _A) {
@@ -272,7 +268,7 @@ void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint
         return;
     }
     double step = STEP;
-    double maxMesh = 2000;
+    double maxMesh = 200;
     size_t nOfVars = _startPoint.size();
     vector<double> k1, k2, k3, k4;
     vector<double> p2, p3, p4;
@@ -292,13 +288,15 @@ void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint
             point[j] = _startPoint[j] + step * K[j];
             fOut << point[j] << " ";
         }
-        error.push_back(point[0] - real0(step, i)[0]);
-        //error.push_back(normInfVect(vminus(point, real0(step, i))));
+        //error.push_back(point[0] - real0(step, i)[0]);
+        error.push_back(normInfVect(vminus(point, real0(step, i))));
         //cout << "Error = " << normInfVect(vminus(point, real0(step, i))) << endl;
         //vectorPrint(K);
         fOut << endl;
         _startPoint = point;
     }
+    //cout << "Error vector" << endl;
+    //vectorPrint(error);
     cout << "Error is " << normInfVect(error) << endl;
 }
 
@@ -356,7 +354,7 @@ void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint)
         return;
     }
     double step = STEP;
-    double maxMesh = 200;
+    double maxMesh = 800;
     //fOut << maxMesh << endl;
     size_t nOfVars = _startPoint.size();
     //cout << nOfVars << endl;
@@ -369,8 +367,8 @@ void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint)
             _startPoint[i] += step * f[i];
         }
         point = Newton(_func, p, _startPoint, step);
-        error.push_back(point[0] - real0(step, i)[0]);
-        //error.push_back(normInfVect(vminus(point, real0(step, i))));
+        //error.push_back(point[0] - real0(step, i)[0]);
+        error.push_back(normInfVect(vminus(point, real0(step, i))));
         //cout << "Error = " << normInfVect(vminus(point, real0(step, i))) << endl;
         for (int j = 0; j < nOfVars; ++j) {
             fOut << point[j] << " ";
@@ -388,7 +386,7 @@ void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPo
         return;
     }
     double step = STEP;
-    double maxMesh = 2000;
+    double maxMesh = 200;
     int order = 4;
     size_t nOfVars = _startPoint.size();
     vector<vector<double>> prevValues (order, vector<double>());
@@ -411,8 +409,8 @@ void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPo
                     37.0 * prevValues[1][j] - 9.0 * prevValues[0][j]);
             fOut << point[j] << " ";
         }
-        error.push_back(point[0] - real0(step, i)[0]);
-        //error.push_back(normInfVect(vminus(point, real0(step, i))));
+        //error.push_back(point[0] - real0(step, i)[0]);
+        error.push_back(normInfVect(vminus(point, real0(step, i))));
         // Updating previous points
         for (int j = 0; j < 3; ++j) {
             prevValues[j] = prevValues[j + 1];
@@ -451,8 +449,8 @@ void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint) 
         cout << "Error while opening file" << endl;
         return;
     }
-    double step = 0.01;
-    double maxMesh = 120;
+    double step = STEP;
+    double maxMesh = 800;
     size_t nOfVars = _startPoint.size();
     vector<double> f1, f2, f3, f4;
     vector<double> p2(nOfVars);
