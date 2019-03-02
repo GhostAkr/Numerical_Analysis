@@ -100,9 +100,7 @@ void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPo
     }
     double step = STEP;
     double maxMesh = 200;
-    //fOut << maxMesh << endl;
     size_t nOfVars = _startPoint.size();
-    //cout << nOfVars << endl;
     vector<double> error;
     for (int i = 1; i < maxMesh; ++i) {
         vector<double> point(nOfVars);
@@ -158,10 +156,6 @@ vector<double> gaussLinearSolve(vector<vector<double>> _A) {
             }
         }
     }
-//    if (!onlyDesitionCheck(_A)) {
-//        cout << "Linear system has infinite number of solutions or hasn't it at all" << endl;
-//        return NULL;
-//    }
     // Second part
     vector<double> result(rowsA, 0);
     for (int i = rowsA - 1; i >= 0; --i) {
@@ -288,15 +282,10 @@ void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint
             point[j] = _startPoint[j] + step * K[j];
             fOut << point[j] << " ";
         }
-        //error.push_back(point[0] - real0(step, i)[0]);
         error.push_back(normInfVect(vminus(point, real0(step, i))));
-        //cout << "Error = " << normInfVect(vminus(point, real0(step, i))) << endl;
-        //vectorPrint(K);
         fOut << endl;
         _startPoint = point;
     }
-    //cout << "Error vector" << endl;
-    //vectorPrint(error);
     cout << "Error is " << normInfVect(error) << endl;
 }
 
@@ -355,9 +344,7 @@ void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint)
     }
     double step = STEP;
     double maxMesh = 800;
-    //fOut << maxMesh << endl;
     size_t nOfVars = _startPoint.size();
-    //cout << nOfVars << endl;
     vector<double> p(nOfVars, 0);
     vector<double> error;
     for (int i = 1; i < maxMesh; ++i) {
@@ -367,9 +354,7 @@ void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint)
             _startPoint[i] += step * f[i];
         }
         point = Newton(_func, p, _startPoint, step);
-        //error.push_back(point[0] - real0(step, i)[0]);
         error.push_back(normInfVect(vminus(point, real0(step, i))));
-        //cout << "Error = " << normInfVect(vminus(point, real0(step, i))) << endl;
         for (int j = 0; j < nOfVars; ++j) {
             fOut << point[j] << " ";
         }
@@ -409,7 +394,6 @@ void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPo
                     37.0 * prevValues[1][j] - 9.0 * prevValues[0][j]);
             fOut << point[j] << " ";
         }
-        //error.push_back(point[0] - real0(step, i)[0]);
         error.push_back(normInfVect(vminus(point, real0(step, i))));
         // Updating previous points
         for (int j = 0; j < 3; ++j) {
@@ -472,8 +456,7 @@ void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint) 
             point[j] = _startPoint[j] + (step / 24)*(9 * f1[j] + 19 * f4[j] - 5 * f3[j] + f2[j]);
             fOut << point[j] << " ";
         }
-        error.push_back(point[0] - real0(step, i)[0]);
-        //error.push_back(normInfVect(vminus(point, real0(step, i))));
+        error.push_back(normInfVect(vminus(point, real0(step, i))));
         fOut << endl;
         _startPoint = point;
         f1 = f2;
