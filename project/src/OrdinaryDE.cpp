@@ -306,6 +306,10 @@ vector<double> vplus(vector<double> v, vector<double> w) {
 }
 
 vector<double> vminus(vector<double> v, vector<double> w) {
+    if (v.size() != w.size()) {
+        cout << "Dimensions are incorrect" << endl;
+        return {};
+    }
     vector<double> res(v.size());
     for (int i = 0; i < v.size(); i++) {
         res[i] = v[i] - w[i];
@@ -343,7 +347,8 @@ void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint)
         return;
     }
     double step = STEP;
-    double maxMesh = 800;
+    step /= 2.0;
+    double maxMesh = 400;
     size_t nOfVars = _startPoint.size();
     vector<double> p(nOfVars, 0);
     vector<double> error;
@@ -354,7 +359,7 @@ void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint)
             _startPoint[i] += step * f[i];
         }
         point = Newton(_func, p, _startPoint, step);
-        error.push_back(normInfVect(vminus(point, real0(step, i))));
+        error.push_back(normInfVect(vminus(point, real0(step * 2, i))));
         for (int j = 0; j < nOfVars; ++j) {
             fOut << point[j] << " ";
         }
