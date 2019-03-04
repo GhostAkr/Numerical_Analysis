@@ -5,8 +5,8 @@
 #ifndef NUMERICAL_ANALYSIS_ORDINARYDE_H
 #define NUMERICAL_ANALYSIS_ORDINARYDE_H
 
-#define STEP 0.00025
-#define MESH 800
+#define STEP 0.001
+#define MESH 200
 
 #include <iostream>
 #include <vector>
@@ -31,7 +31,7 @@ vector<double> funcOwn(vector<double> _point);
 // Methods
 
 void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
-void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint);
+void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
 void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
 void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint);
 void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint);
@@ -40,6 +40,7 @@ void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint);
 // Methods with returning values
 
 vector<double> EulerExplicitReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step);
+vector<double> EulerImplicitReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step);
 vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step);
 
 // Linear equations

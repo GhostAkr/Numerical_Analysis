@@ -3,12 +3,12 @@
 
 int main() {
     vector<double> startPoint {1, 0};
-    cout << "Explicit Euler" << endl;
-    EulerExplicit(func0, startPoint, true);
+    //cout << "Explicit Euler" << endl;
+    //EulerExplicit(func0, startPoint, true);
     //cout << "Implicit Euler" << endl;
-    //EulerImplicit(func0, startPoint);
-    //cout << "Runge - Kutta" << endl;
-    //RungeKutta(func0, startPoint, true);
+    //EulerImplicit(func0, startPoint, true);
+    cout << "Runge - Kutta" << endl;
+    RungeKutta(func0, startPoint, true);
     //cout << "Symmetric" << endl;
     //Symmetric(func0, startPoint);
     //cout << "Adams - Bashfort" << endl;

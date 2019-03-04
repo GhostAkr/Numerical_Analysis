@@ -149,20 +149,35 @@ vector<double> EulerExplicitReturn(vector<double> _func(vector<double>), vector<
     return point;
 }
 
-void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint) {
+void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule) {
     std::ofstream fOut("../data/solution.dat");
     if (!fOut) {  // Exception
         cout << "Error while opening file" << endl;
         return;
     }
+    int order = 1;
+    double eps = 1e-3;
     double step = STEP;
     double maxMesh = MESH;
     size_t nOfVars = _startPoint.size();
     vector<double> p(nOfVars, 0);
     vector<double> error;
-    for (int i = 1; i < maxMesh; ++i) {
+    for (int i = 1; i <= maxMesh; ++i) {
         vector<double> point(nOfVars);
         point = Newton(_func, p, _startPoint, step);
+        if (_isRungeRule) {
+            while (true) {
+                step /= 2.0;
+                vector<double> possiblePoint = EulerExplicitReturn(_func, _startPoint, 2, step);
+                double denominator = 1.0 / (pow(2, order) - 1);
+                if (normInfVect(multV(vminus(possiblePoint, point), denominator)) <= eps) {
+                    point = possiblePoint;
+                    break;
+                }
+                vector<double> point = EulerExplicitReturn(_func, _startPoint, 1, step);
+            }
+            step *= 2.0;
+        }
         for (int j = 0; j < nOfVars; ++j) {
             fOut << point[j] << " ";
         }
@@ -171,6 +186,20 @@ void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPo
         _startPoint = point;
     }
     cout << "Error is " << normInfVect(error) << endl;
+}
+
+vector<double> EulerImplicitReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step) {
+    double step = _step;
+    size_t nOfVars = _startPoint.size();
+    vector<double> p(nOfVars, 0);
+    vector<double> error;
+    vector<double> point(nOfVars);
+    for (int i = 1; i <= _nOfIterations; ++i) {
+        point = Newton(_func, p, _startPoint, step);
+        error.push_back(normInfVect(vminus(point, real0(step, i))));
+        _startPoint = point;
+    }
+    return point;
 }
 
 vector<double> gaussLinearSolve(vector<vector<double>> _A) {
@@ -289,7 +318,7 @@ void matrixPrint(vector<vector<double>> _sourceMatrix) {
 }
 
 void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule) {
-    double eps = 1e-5;
+    double eps = 1e-10;
     std::ofstream fOut("../data/solution.dat");
     if (!fOut) {  // Exception
         cout << "Error while opening file" << endl;
@@ -317,17 +346,23 @@ void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint
             point[j] = _startPoint[j] + step * K[j];
         }
         if (_isRungeRule) {
+            double prevStep = step;
             while (true) {
                 step /= 2.0;
+                double norm = 0.0;
                 vector<double> possiblePoint = RungeKuttaReturn(_func, _startPoint, 2, step);
                 double denominator = 1.0 / (pow(2, order) - 1);
                 if (normInfVect(multV(vminus(possiblePoint, point), denominator)) <= eps) {
+                    norm = normInfVect(multV(vminus(possiblePoint, point), denominator));
                     point = possiblePoint;
+                    step = prevStep;
+                    if (norm <= eps * 1e-5) {
+                        step *= 2;
+                    }
                     break;
                 }
                 vector<double> point = RungeKuttaReturn(_func, _startPoint, 1, step);
             }
-            step *= 2.0;
         }
         for (int j = 0; j < nOfVars; ++j) {
             fOut << point[j] << " ";
