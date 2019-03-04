@@ -5,7 +5,7 @@
 #ifndef NUMERICAL_ANALYSIS_ORDINARYDE_H
 #define NUMERICAL_ANALYSIS_ORDINARYDE_H
 
-#define STEP 0.0005
+#define STEP 0.00025
 
 #include <iostream>
 #include <vector>
@@ -29,7 +29,7 @@ vector<double> funcOwn(vector<double> _point);
 
 void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint);
 void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint);
-void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint);
+void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
 void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint);
 void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint);
 void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint);
@@ -58,6 +58,6 @@ double normInfVect(vector<double> _vect);
 
 // Doubt functions
 
-vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<double> _startPoint);
+vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step);
 
 #endif //NUMERICAL_ANALYSIS_ORDINARYDE_H

@@ -255,7 +255,8 @@ void matrixPrint(vector<vector<double>> _sourceMatrix) {
     cout << endl;
 }
 
-void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint) {
+void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule) {
+    double eps = 1e-5;
     std::ofstream fOut("../data/solution.dat");
     if (!fOut) {  // Exception
         cout << "Error while opening file" << endl;
@@ -268,7 +269,8 @@ void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint
     vector<double> p2, p3, p4;
     vector<double> K(nOfVars);
     vector<double> error;
-    for (int i = 1; i < maxMesh; ++i) {
+    int order = 4;
+    for (int i = 1; i <= maxMesh; ++i) {
         vector<double> point(nOfVars);
         k1 = _func(_startPoint);
         p2 = vplus(_startPoint, multV(k1, step / 2));
@@ -280,6 +282,21 @@ void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint
         for (int j = 0; j < nOfVars; ++j) {
             K[j] = (k1[j] + 2*k2[j] + 2*k3[j] + k4[j]) / 6;
             point[j] = _startPoint[j] + step * K[j];
+        }
+        if (_isRungeRule) {
+            while (true) {
+                step /= 2.0;
+                vector<double> possiblePoint = RungeKuttaReturn(_func, _startPoint, 2, step);
+                double denominator = 1.0 / (pow(2, order) - 1);
+                if (normInfVect(multV(vminus(possiblePoint, point), denominator)) <= eps) {
+                    point = possiblePoint;
+                    break;
+                }
+                vector<double> point = RungeKuttaReturn(_func, _startPoint, 1, step);
+            }
+            step *= 2.0;
+        }
+        for (int j = 0; j < nOfVars; ++j) {
             fOut << point[j] << " ";
         }
         error.push_back(normInfVect(vminus(point, real0(step, i))));
@@ -385,7 +402,7 @@ void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPo
     prevValues[0] = _func(_startPoint);
     vector<double> currentPoint = _startPoint;
     for (int i = 1; i < order; ++i) {
-        currentPoint = RungeKuttaReturn(func0, currentPoint);
+        currentPoint = RungeKuttaReturn(func0, currentPoint, 1, step);
         error.push_back(normInfVect(vminus(currentPoint, real0(step, i))));
         for (int j = 0; j < nOfVars; ++j) {
             fOut << currentPoint[j] << " ";
@@ -412,23 +429,25 @@ void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPo
     cout << "Error is " << normInfVect(error) << endl;
 }
 
-vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<double> _startPoint) {
-    double step = STEP;
+vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step) {
     size_t nOfVars = _startPoint.size();
     vector<double> k1, k2, k3, k4;
     vector<double> p2, p3, p4;
     vector<double> K(nOfVars);
     vector<double> point(nOfVars);
-    k1 = _func(_startPoint);
-    p2 = vplus(_startPoint, multV(k1, step / 2));
-    k2 = _func(p2);
-    p3 = vplus(_startPoint, multV(k2, step / 2));
-    k3 = _func(p3);
-    p4 = vplus(_startPoint, multV(k3, step));
-    k4 = _func(p4);
-    for (int j = 0; j < nOfVars; ++j) {
-        K[j] = (k1[j] + 2*k2[j] + 2*k3[j] + k4[j]) / 6;
-        point[j] = _startPoint[j] + step * K[j];
+    for (int i = 1; i <= _nOfIterations; ++i) {
+        k1 = _func(_startPoint);
+        p2 = vplus(_startPoint, multV(k1, _step / 2.0));
+        k2 = _func(p2);
+        p3 = vplus(_startPoint, multV(k2, _step / 2.0));
+        k3 = _func(p3);
+        p4 = vplus(_startPoint, multV(k3, _step));
+        k4 = _func(p4);
+        for (int j = 0; j < nOfVars; ++j) {
+            K[j] = (k1[j] + 2*k2[j] + 2*k3[j] + k4[j]) / 6.0;
+            point[j] = _startPoint[j] + _step * K[j];
+        }
+        _startPoint = point;
     }
     return point;
 }
@@ -447,13 +466,13 @@ void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint) 
     vector<double> point(nOfVars);
     vector<double> error;
     f1 = _func(_startPoint);
-    _startPoint = RungeKuttaReturn(_func, _startPoint);
+    _startPoint = RungeKuttaReturn(_func, _startPoint, 1, step);
     error.push_back(normInfVect(vminus(_startPoint, real0(step, 1))));
     f2 = _func(_startPoint);
-    _startPoint = RungeKuttaReturn(_func, _startPoint);
+    _startPoint = RungeKuttaReturn(_func, _startPoint, 1, step);
     error.push_back(normInfVect(vminus(_startPoint, real0(step, 2))));
     f3 = _func(_startPoint);
-    _startPoint = RungeKuttaReturn(_func, _startPoint);
+    _startPoint = RungeKuttaReturn(_func, _startPoint, 1, step);
     error.push_back(normInfVect(vminus(_startPoint, real0(step, 3))));
     f4 = _func(_startPoint);
     for (int i = 1; i < maxMesh; ++i) {
