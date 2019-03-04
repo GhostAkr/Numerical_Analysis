@@ -92,21 +92,38 @@ void vectorPrint(vector<double> _sourceVector) {
     cout << endl;
 }
 
-void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint) {
+void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule) {
+    double eps = 1e-3;
     std::ofstream fOut("../data/solution.dat");
     if (!fOut) {  // Exception
         cout << "Error while opening file" << endl;
         return;
     }
+    int order = 1;
     double step = STEP;
-    double maxMesh = 200;
+    double maxMesh = MESH;
     size_t nOfVars = _startPoint.size();
     vector<double> error;
-    for (int i = 1; i < maxMesh; ++i) {
+    for (int i = 1; i <= maxMesh; ++i) {
         vector<double> point(nOfVars);
         vector<double> f = _func(_startPoint);
         for (int j = 0; j < nOfVars; ++j) {
             point[j] = _startPoint[j] + step * f[j];
+        }
+        if (_isRungeRule) {
+            while (true) {
+                step /= 2.0;
+                vector<double> possiblePoint = EulerExplicitReturn(_func, _startPoint, 2, step);
+                double denominator = 1.0 / (pow(2, order) - 1);
+                if (normInfVect(multV(vminus(possiblePoint, point), denominator)) <= eps) {
+                    point = possiblePoint;
+                    break;
+                }
+                vector<double> point = EulerExplicitReturn(_func, _startPoint, 1, step);
+            }
+            step *= 2.0;
+        }
+        for (int j = 0; j < nOfVars; ++j) {
             fOut << point[j] << " ";
         }
         error.push_back(normInfVect(vminus(point, real0(step, i))));
@@ -116,6 +133,22 @@ void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPo
     cout << "Error is " << normInfVect(error) << endl;
 }
 
+vector<double> EulerExplicitReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step) {
+    double step = _step;
+    size_t nOfVars = _startPoint.size();
+    vector<double> error;
+    vector<double> point(nOfVars);
+    for (int i = 1; i <= _nOfIterations; ++i) {
+        vector<double> f = _func(_startPoint);
+        for (int j = 0; j < nOfVars; ++j) {
+            point[j] = _startPoint[j] + step * f[j];
+        }
+        error.push_back(normInfVect(vminus(point, real0(step, i))));
+        _startPoint = point;
+    }
+    return point;
+}
+
 void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint) {
     std::ofstream fOut("../data/solution.dat");
     if (!fOut) {  // Exception
@@ -123,7 +156,7 @@ void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPo
         return;
     }
     double step = STEP;
-    double maxMesh = 400;
+    double maxMesh = MESH;
     size_t nOfVars = _startPoint.size();
     vector<double> p(nOfVars, 0);
     vector<double> error;
@@ -263,7 +296,7 @@ void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint
         return;
     }
     double step = STEP;
-    double maxMesh = 200;
+    double maxMesh = MESH;
     size_t nOfVars = _startPoint.size();
     vector<double> k1, k2, k3, k4;
     vector<double> p2, p3, p4;
@@ -365,7 +398,7 @@ void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint)
     }
     double step = STEP;
     step /= 2.0;
-    double maxMesh = 400;
+    double maxMesh = MESH;
     size_t nOfVars = _startPoint.size();
     vector<double> p(nOfVars, 0);
     vector<double> error;
@@ -393,7 +426,7 @@ void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPo
         return;
     }
     double step = STEP;
-    double maxMesh = 1600;
+    double maxMesh = MESH;
     int order = 4;
     size_t nOfVars = _startPoint.size();
     vector<vector<double>> prevValues (order, vector<double>());
@@ -459,7 +492,7 @@ void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint) 
         return;
     }
     double step = STEP;
-    double maxMesh = 1600;
+    double maxMesh = MESH;
     size_t nOfVars = _startPoint.size();
     vector<double> f1, f2, f3, f4;
     vector<double> p2(nOfVars);

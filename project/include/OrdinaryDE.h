@@ -6,6 +6,7 @@
 #define NUMERICAL_ANALYSIS_ORDINARYDE_H
 
 #define STEP 0.00025
+#define MESH 800
 
 #include <iostream>
 #include <vector>
@@ -15,6 +16,8 @@
 using std::cout;
 using std::endl;
 using std::vector;
+
+// TODO: CLOSE ALL FILE ITERATORS
 
 // Tests
 
@@ -27,12 +30,17 @@ vector<double> funcOwn(vector<double> _point);
 
 // Methods
 
-void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint);
+void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
 void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint);
 void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
 void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint);
 void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint);
 void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint);
+
+// Methods with returning values
+
+vector<double> EulerExplicitReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step);
+vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step);
 
 // Linear equations
 
@@ -55,9 +63,5 @@ vector<double> vplus(vector<double> v, vector<double> w);
 vector<double> vminus(vector<double> v, vector<double> w);
 double error(vector<double> _realSolution, vector<double> _apprSolution);
 double normInfVect(vector<double> _vect);
-
-// Doubt functions
-
-vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step);
 
 #endif //NUMERICAL_ANALYSIS_ORDINARYDE_H
