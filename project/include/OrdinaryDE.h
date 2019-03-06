@@ -5,8 +5,8 @@
 #ifndef NUMERICAL_ANALYSIS_ORDINARYDE_H
 #define NUMERICAL_ANALYSIS_ORDINARYDE_H
 
-#define STEP 0.001
-#define MESH 200
+#define STEP 0.00025
+#define MESH 0.2
 
 #include <iostream>
 #include <vector>
@@ -33,15 +33,17 @@ vector<double> funcOwn(vector<double> _point);
 void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
 void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
 void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
-void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint);
-void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint);
+void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
+void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
 void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint);
 
 // Methods with returning values
 
+vector<double> AdamsBashfortReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step);
 vector<double> EulerExplicitReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step);
 vector<double> EulerImplicitReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step);
 vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step);
+vector<double> SymmetricReturn(vector<double> _func(vector<double>), vector<double> _startPoint, int _nOfIterations, double _step);
 
 // Linear equations
 
@@ -64,5 +66,8 @@ vector<double> vplus(vector<double> v, vector<double> w);
 vector<double> vminus(vector<double> v, vector<double> w);
 double error(vector<double> _realSolution, vector<double> _apprSolution);
 double normInfVect(vector<double> _vect);
+
+
+vector<double> real0(double t);
 
 #endif //NUMERICAL_ANALYSIS_ORDINARYDE_H

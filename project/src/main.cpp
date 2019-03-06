@@ -7,13 +7,13 @@ int main() {
     //EulerExplicit(func0, startPoint, true);
     //cout << "Implicit Euler" << endl;
     //EulerImplicit(func0, startPoint, true);
-    cout << "Runge - Kutta" << endl;
-    RungeKutta(func0, startPoint, true);
+    //cout << "Runge - Kutta" << endl;
+    //RungeKutta(func0, startPoint, false);
     //cout << "Symmetric" << endl;
-    //Symmetric(func0, startPoint);
+    //Symmetric(func0, startPoint, true);
     //cout << "Adams - Bashfort" << endl;
-    //AdamsBashfort(func0, startPoint);
-    //cout << "Prediction-correction" << endl;
-    //PredCorr(func0, startPoint);
+    //AdamsBashfort(func0, startPoint, false);
+    cout << "Prediction-correction" << endl;
+    PredCorr(func0, startPoint);
     return 0;
 }
