@@ -5,8 +5,8 @@
 #ifndef NUMERICAL_ANALYSIS_ORDINARYDE_H
 #define NUMERICAL_ANALYSIS_ORDINARYDE_H
 
-#define STEP 0.00025
-#define MESH 0.2
+#define STEP 0.001
+#define MESH 0.8
 
 #include <iostream>
 #include <vector>
@@ -16,6 +16,7 @@
 using std::cout;
 using std::endl;
 using std::vector;
+using std::string;
 
 // TODO: CLOSE ALL FILE ITERATORS
 
@@ -30,11 +31,11 @@ vector<double> funcOwn(vector<double> _point);
 
 // Methods
 
-void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
-void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
-void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
-void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
-void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule);
+void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule, string _outFile);
+void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule, string _outFile);
+void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule, string _outFile);
+void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule, string _outFile);
+void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule, string _outFile);
 void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint);
 
 // Methods with returning values

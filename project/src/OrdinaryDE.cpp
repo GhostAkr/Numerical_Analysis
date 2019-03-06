@@ -92,7 +92,7 @@ void vectorPrint(vector<double> _sourceVector) {
     cout << endl;
 }
 
-void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule) {
+void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule, string _outFile) {
     double eps = 1e-3;
     std::ofstream fOut("../data/solution.dat");
     if (!fOut) {  // Exception
@@ -157,7 +157,7 @@ vector<double> EulerExplicitReturn(vector<double> _func(vector<double>), vector<
     return point;
 }
 
-void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule) {
+void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule, string _outFile) {
     std::ofstream fOut("../data/solution.dat");
     if (!fOut) {  // Exception
         cout << "Error while opening file" << endl;
@@ -333,9 +333,9 @@ void matrixPrint(vector<vector<double>> _sourceMatrix) {
     cout << endl;
 }
 
-void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule) {
+void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule, string _outFile) {
     double eps = 1e-6;
-    std::ofstream fOut("../data/solution.dat");
+    std::ofstream fOut(_outFile);
     if (!fOut) {  // Exception
         cout << "Error while opening file" << endl;
         return;
@@ -455,7 +455,7 @@ vector<double> real0(double t) {
     return result;
 }
 
-void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule) {
+void Symmetric(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule, string _outFile) {
     std::ofstream fOut("../data/solution.dat");
     if (!fOut) {  // Exception
         cout << "Error while opening file" << endl;
@@ -522,7 +522,7 @@ vector<double> SymmetricReturn(vector<double> _func(vector<double>), vector<doub
     return point;
 }
 
-void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule) {
+void AdamsBashfort(vector<double> _func(vector<double>), vector<double> _startPoint, bool _isRungeRule, string _outFile) {
     std::ofstream fOut("../data/solution.dat");
     if (!fOut) {  // Exception
         cout << "Error while opening file" << endl;
@@ -618,7 +618,7 @@ vector<double> RungeKuttaReturn(vector<double> _func(vector<double>), vector<dou
     return point;
 }
 
-void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint) {
+void PredCorr(vector<double> _func(vector<double>), vector<double> _startPoint, string _outFile) {
     std::ofstream fOut("../data/solution.dat");
     if (!fOut) {  // Exception
         cout << "Error while opening file" << endl;
