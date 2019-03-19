@@ -6,7 +6,7 @@
 #define NUMERICAL_ANALYSIS_ORDINARYDE_H
 
 #define STEP 0.001
-#define MESH 0.8
+#define MESH 2
 
 #include <iostream>
 #include <vector>
@@ -28,6 +28,7 @@ vector<double> func2(vector<double> _point);
 vector<double> func3(vector<double> _point);
 vector<double> funcVar1(vector<double> _point);
 vector<double> funcOwn(vector<double> _point);
+vector<double> ff(vector<double> _point);
 
 // Methods
 
@@ -54,6 +55,7 @@ int mainElement(vector<vector<double>> _sourceColumn, int _row);
 // Real solutions
 
 vector<double> real0(double _step, int _iteration);
+vector<double> real1(double t);
 
 // Other
 

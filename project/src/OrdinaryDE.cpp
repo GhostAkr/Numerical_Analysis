@@ -18,6 +18,17 @@ vector<double> func0(vector<double> _point) {
     return result;
 }
 
+vector<double> ff(vector<double> _point) {
+    if (_point.size() != 2) {  // Exception
+        cout << "Incorrect point" << endl;
+        return {};
+    }
+    vector<double> result(2);
+    result[0] = -1000 * _point[0];
+    result[1] = -1 * _point[1];
+    return result;
+}
+
 vector<double> func1(vector<double> _point) {
     if (_point.size() != 2) {  // Exception
         cout << "Incorrect point" << endl;
@@ -134,7 +145,7 @@ void EulerExplicit(vector<double> _func(vector<double>), vector<double> _startPo
         for (int j = 0; j < nOfVars; ++j) {
             fOut << point[j] << " ";
         }
-        error.push_back(normInfVect(vminus(point, real0(t))));
+        error.push_back(normInfVect(vminus(point, real1(t))));
         fOut << endl;
         _startPoint = point;
     }
@@ -197,7 +208,7 @@ void EulerImplicit(vector<double> _func(vector<double>), vector<double> _startPo
         for (int j = 0; j < nOfVars; ++j) {
             fOut << point[j] << " ";
         }
-        error.push_back(normInfVect(vminus(point, real0(t))));
+        error.push_back(normInfVect(vminus(point, real1(t))));
         fOut << endl;
         _startPoint = point;
     }
@@ -364,6 +375,7 @@ void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint
         }
         int rungeTimes = 0;
         t += step;
+        //cout << "step = " << step << endl;
         if (_isRungeRule) {
             while (true) {
                 rungeTimes++;
@@ -374,8 +386,8 @@ void RungeKutta(vector<double> _func(vector<double>), vector<double> _startPoint
                 norm = normInfVect(multV(vminus(possiblePoint, point), denominator));
                 if (norm <= eps) {
                     point = possiblePoint;
-                    if (norm <= eps * 1e-5) {
-                        step *= 2;
+                    if (norm <= eps * 1e-7) {
+                        step *= 4;
                     }
                     break;
                 }
@@ -410,7 +422,7 @@ vector<double> vplus(vector<double> v, vector<double> w) {
 
 vector<double> vminus(vector<double> v, vector<double> w) {
     if (v.size() != w.size()) {
-        cout << "Dimensions are incorrect" << endl;
+        //cout << "Dimensions are incorrect" << endl;
         return {};
     }
     vector<double> res(v.size());
@@ -440,6 +452,13 @@ vector<double> real0(double _step, int _iteration) {
     double t = _step * _iteration;
     result[0] = cos(omega * t);
     result[1] = -omega * sin(omega * t);
+    return result;
+}
+
+vector<double> real1(double t) {
+    vector<double> result (2);
+    result[0] = exp(-1000 * t);
+    result[1] = exp(-t);
     return result;
 }
 
