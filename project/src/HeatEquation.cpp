@@ -213,6 +213,7 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
         cout << "Error while opening file" << endl;
         return;
     }
+    double max = -1.0;
     double L = 1;
     double N = L / _h;
     double T = 1;
@@ -274,8 +275,15 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
             fOut << V0[i] << " ";
         }
         V0[V0.size() - 1] = u0;  // Right border
+        for (int i = 1; i < V0.size(); ++i) {
+            double difference = fabs(V0[i] - V0[i - 1]);
+            if (difference > max) {
+                max = difference;
+            }
+        }
         fOut << V0[V0.size() - 1] << endl;
         currentTime += _t;
     }
+    cout << "Max difference = " << max << endl;
     fOut.close();
 }

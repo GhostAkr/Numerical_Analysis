@@ -4,6 +4,6 @@
 
 int main() {
     string path = "../data/out.dat";
-    mixedScheme(0.5, 0.02, 0.0002, path);
+    mixedScheme(1, 0.001, 0.1, path);
     return 0;
 }
