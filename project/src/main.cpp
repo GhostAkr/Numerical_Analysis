@@ -3,6 +3,7 @@
 #include <iostream>
 
 int main() {
-    test();
+    string path = "../data/out.dat";
+    mixedScheme(0.5, 0.02, 0.0002, path);
     return 0;
 }
