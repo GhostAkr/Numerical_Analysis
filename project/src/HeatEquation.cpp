@@ -147,6 +147,7 @@ double K1(double _x, double _L) {
     } else if (_x >= x2 && _x <= _L) {
         return k2;
     } else {
+        cout << "x = " << _x << endl;
         cout << "Exception in K1 function" << endl;
         return -1.0;
     }
@@ -221,6 +222,9 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
     // Constants
     double c = 1; double ro = 1; double alpha = 2; double beta = 0.5; double gamma = 3;
     double u0 = 0.1; double k1 = 1; double k2 = 0.1; double x1 = 1.0 / 3.0; double x2 = 2.0 / 3.0;
+    int typeOfConditionLeft = 1;
+    int typeOfConditionRight = 1;
+    double flowLeft = 0.0; double flowRight = 0.0;
     // First time layer
     vector<double> V0 = mesh(N, L);
     for (int i = 0; i < V0.size(); ++i) {
@@ -231,7 +235,11 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
     fOut << endl;
     vector<vector<double>> tridiagonalArgument (N - 1, vector<double> (4, 0));
     double currentTime = 0.0;
+    vector<double> leftCondition;
+    vector<double> rightCondition;
+    int timeLayer = 0;
     while (currentTime <= T) {
+        timeLayer++;
         // Calculating A_1, B_1, C_1, F_1
         double a0 = K1(_h - 0.5 * _h, L);  // a_1
         double a1 = K1(2 * _h - 0.5 * _h, L);  // a_2
@@ -239,7 +247,20 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
         double B = _sigma * a1 / _h;
         double C = A + B + c * ro * _h / _t;
         double F = c * ro * V0[1] * _h / _t + (1 - _sigma)*(a1*(V0[2] - V0[1]) - a0 * (V0[1] - V0[0])) / _h;
-        F += A * u0;
+        // Left boundary condition
+        leftCondition = boundaryLeft(typeOfConditionLeft, V0[0], V0[1], _h, _t, _sigma, flowLeft, flowLeft, L, timeLayer);
+        switch (leftCondition.size()) {
+            case 1:
+                F += A * leftCondition[0];
+                break;
+            case 2:
+                C -= A * leftCondition[0];
+                F += A * leftCondition[1];
+                break;
+            default:
+                cout << "Exception in left condition" << endl;
+                break;
+        }
         // Filling of tridiagonalArgument
         tridiagonalArgument[0][1] = -C;
         tridiagonalArgument[0][2] = B;
@@ -251,11 +272,21 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
             B = _sigma * a1 / _h;
             C = A + B + c * ro * _h / _t;
             F = c * ro * V0[i + 1] * _h / _t + (1 - _sigma)*(a1*(V0[i + 2] - V0[i + 1]) - a0 * (V0[i + 1] - V0[i])) / _h;
-            if (i == 1) {
-                F -= A * u0;
-            }
             if (i == N - 2) {
-                F += B * u0;
+                // Right boundary condition
+                rightCondition = boundaryRight(typeOfConditionRight, V0[V0.size() - 2], V0[V0.size() - 1], _h, _t, _sigma, flowRight, flowRight, L, N, timeLayer);
+                switch (rightCondition.size()) {
+                    case 1:
+                        F += B * rightCondition[0];
+                        break;
+                    case 2:
+                        C -= B * rightCondition[0];
+                        F += B * rightCondition[1];
+                        break;
+                    default:
+                        cout << "Exception in right condition" << endl;
+                        break;
+                }
                 tridiagonalArgument[i][0] = A;
                 tridiagonalArgument[i][1] = -C;
                 tridiagonalArgument[i][3] = -F;
@@ -268,22 +299,80 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
         }
         // Filling of next layer
         vector<double> nextLayer = tridiagonalLinearSolve(tridiagonalArgument);
-        V0[0] = u0;  // Left border
+        // Left border
+        switch (leftCondition.size()) {
+            case 1:
+                V0[0] = leftCondition[0];
+                break;
+            case 2:
+                V0[0] = leftCondition[0] * nextLayer[0] + leftCondition[1];
+                break;
+            default:
+                cout << "Exception in left border" << endl;
+                break;
+        }
+        // Right border
+        switch (rightCondition.size()) {
+            case 1:
+                V0[V0.size() - 1] = rightCondition[0];
+                break;
+            case 2:
+                V0[V0.size() - 1] = rightCondition[0] * nextLayer[nextLayer.size() - 1] + rightCondition[1];
+                break;
+            default:
+                cout << "Exception in right border" << endl;
+                break;
+        }
         fOut << V0[0] << " ";
         for (int i = 1; i <= V0.size() - 2; ++i) {
             V0[i] = nextLayer[i - 1];
             fOut << V0[i] << " ";
         }
-        V0[V0.size() - 1] = u0;  // Right border
+        fOut << V0[V0.size() - 1] << endl;
         for (int i = 1; i < V0.size(); ++i) {
             double difference = fabs(V0[i] - V0[i - 1]);
             if (difference > max) {
                 max = difference;
             }
         }
-        fOut << V0[V0.size() - 1] << endl;
         currentTime += _t;
     }
     cout << "Max difference = " << max << endl;
     fOut.close();
+}
+
+vector<double> boundaryLeft(int _type, double _y0, double _y1, double _h, double _t, double _sigma, double _p, double _p1, double _L, double _layer) {
+    double u0 = 0.1;
+    double c = 1; double ro = 1;
+    //double u0 = 0.0;  // For error calculating
+    vector<double> result;
+    if (_type == 0) {
+        result.push_back(u0);
+        return result;
+    }
+    double a0 = K1(_h - 0.5 * _h, _L);
+    double omega = a0 * (_y1 - _y0) / _h;
+    double kappa = (a0 * _sigma / _h) / ((c * _h * ro / (2 * _t)) + (_sigma * a0 / _h));
+    double mu = (c * ro * _y0 * _h / (2 * _t) - _sigma * _p1 + (1 - _sigma) * (omega - _p)) / (c * ro * _h / (2 * _t) + _sigma * a0 / _h);
+    result.push_back(kappa);
+    result.push_back(mu);
+    return result;
+}
+
+vector<double> boundaryRight(int _type, double _y0, double _y1, double _h, double _t, double _sigma, double _p, double _p1, double _L, double _N, double _layer) {
+    double u0 = 0.1;
+    double c = 1; double ro = 1;
+    //double u0 = exp(-_layer * _t) * 0.0175;  // For error calculating
+    vector<double> result;
+    if (_type == 0) {
+        result.push_back(u0);
+        return result;
+    }
+    double an = K1(_L - 0.5 * _h, _L);
+    double omega = an * (_y1 - _y0) / _h;
+    double kappa = (_sigma * an / _h) / (c * ro * _h / (2 * _t) + _sigma * an / _h);
+    double mu = (c * ro * _y1 * _h / (2 * _t) + _sigma * _p1 + (1 - _sigma) * (_p - omega)) / (c * ro * _h / (2 * _t) + _sigma * an / _h);
+    result.push_back(kappa);
+    result.push_back(mu);
+    return result;
 }

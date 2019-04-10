@@ -25,6 +25,10 @@ void explicitScheme(double _t, double _h);
 // Schemes
 void mixedScheme(double _sigma, double _h, double _t, string _path);  // Mixed scheme with tridiagonal function
 
+// Boundary conditions
+vector<double> boundaryLeft(int _type, double _y0, double _y1, double _h, double _t, double _sigma, double _p, double _p1, double _L, double _layer);  // 0 --- temperature; 1 --- heat flow
+vector<double> boundaryRight(int _type, double _y0, double _y1, double _h, double _t, double _sigma, double _p, double _p1, double _L, double _N, double _layer);  // 0 --- temperature; 1 --- heat flow
+
 // Special functions
 double K1 (double _x, double _L);
 
