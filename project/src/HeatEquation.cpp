@@ -153,6 +153,11 @@ double K1(double _x, double _L) {
     }
 }
 
+double K2 (double _u) {
+    double alpha = 0.0; double beta = 0.5; double gamma = 2.0;
+    return alpha + beta * pow(_u, gamma);
+}
+
 void Fill(string path) {
     std::ofstream fOut(path);
     if (!fOut) {
@@ -214,6 +219,7 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
         cout << "Error while opening file" << endl;
         return;
     }
+    vector<double> error;
     double max = -1.0;
     double L = 1;
     double N = L / _h;
@@ -222,23 +228,33 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
     // Constants
     double c = 1; double ro = 1; double alpha = 2; double beta = 0.5; double gamma = 3;
     double u0 = 0.1; double k1 = 1; double k2 = 0.1; double x1 = 1.0 / 3.0; double x2 = 2.0 / 3.0;
-    int typeOfConditionLeft = 1;
-    int typeOfConditionRight = 1;
+    int typeOfConditionLeft = 0;
+    int typeOfConditionRight = 0;
     double flowLeft = 0.0; double flowRight = 0.0;
     // First time layer
     vector<double> V0 = mesh(N, L);
     for (int i = 0; i < V0.size(); ++i) {
         double x = i * _h;
         V0[i] = u0 + x * (L - x);
+        //V0[i] = sin(x);
         fOut << V0[i] << " ";
     }
     fOut << endl;
+    max = -1.0;
+    for (int i = 0; i < V0.size(); ++i) {
+        double difference = fabs(V0[i] - exactTest(i * _h, 0));
+        if (difference > max) {
+            max = difference;
+        }
+    }
+    error.push_back(max);
     vector<vector<double>> tridiagonalArgument (N - 1, vector<double> (4, 0));
     double currentTime = 0.0;
     vector<double> leftCondition;
     vector<double> rightCondition;
     int timeLayer = 0;
     while (currentTime <= T) {
+        currentTime += _t;
         timeLayer++;
         // Calculating A_1, B_1, C_1, F_1
         double a0 = K1(_h - 0.5 * _h, L);  // a_1
@@ -329,15 +345,24 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
             fOut << V0[i] << " ";
         }
         fOut << V0[V0.size() - 1] << endl;
-        for (int i = 1; i < V0.size(); ++i) {
-            double difference = fabs(V0[i] - V0[i - 1]);
+        // Error calculating
+        max = -1.0;
+        for (int i = 0; i < V0.size(); ++i) {
+            double difference = fabs(V0[i] - exactTest(i * _h, currentTime));
             if (difference > max) {
                 max = difference;
             }
         }
-        currentTime += _t;
+        error.push_back(max);
     }
-    cout << "Max difference = " << max << endl;
+    // Total error
+    max = -1.0;
+    for (int i = 0; i < error.size(); ++i) {
+        if (error[i] > max) {
+            max = error[i];
+        }
+    }
+    cout << "Error = " << max << endl;
     fOut.close();
 }
 
@@ -362,7 +387,7 @@ vector<double> boundaryLeft(int _type, double _y0, double _y1, double _h, double
 vector<double> boundaryRight(int _type, double _y0, double _y1, double _h, double _t, double _sigma, double _p, double _p1, double _L, double _N, double _layer) {
     double u0 = 0.1;
     double c = 1; double ro = 1;
-    //double u0 = exp(-_layer * _t) * 0.0175;  // For error calculating
+    //double u0 = exp(-_layer * _t) * sin(1);  // For error calculating
     vector<double> result;
     if (_type == 0) {
         result.push_back(u0);
@@ -375,4 +400,161 @@ vector<double> boundaryRight(int _type, double _y0, double _y1, double _h, doubl
     result.push_back(kappa);
     result.push_back(mu);
     return result;
+}
+
+void quasilinearEquationScheme(double _h, double _t, string _path) {
+    double eps = 0.8;
+    double epsZero = 1e-7;
+    vector<double> error;
+    int M = 1;  // Limit of internal iterations
+    std::ofstream fOut(_path);
+    if (!fOut) {
+        cout << "Error while opening file" << endl;
+        return;
+    }
+    double L = 20;
+    double visualL = 10;
+    int visualN = visualL / _h;
+    int N = L / _h;
+    //cout << "N = " << N << endl;
+    double T = 1;
+    double N0 = T / _t;
+    // Constants
+    double cc = 5; double sigma = 2; double kappa = 0.5;
+    double u0 = pow(sigma * cc * cc / kappa, 1.0 / sigma);
+    // First time layer
+    vector<double> V0 = mesh(N, L);
+    for (int i = 0; i < V0.size(); ++i) {
+        V0[i] = 0.0;
+//        fOut << V0[i] << " ";
+    }
+    for (int i = 0; i < visualN; ++i) {
+        fOut << V0[i] << " ";
+    }
+    fOut << endl;
+    vector<vector<double>> tridiagonalArgument (N - 1, vector<double> (4, 0));
+    double currentTime = 0.0;
+    // Main cycle
+    while (currentTime <= T) {
+        currentTime += _t;
+        vector<double> bufferLayer = V0;
+        int iterations = 0;
+        while (true) {
+            iterations++;
+            // First line in tridiagonal argument
+            double ai = 0.5 * (K2(bufferLayer[1]) + K2(bufferLayer[0]));
+            double ai1 = 0.5 * (K2(bufferLayer[2]) + K2(bufferLayer[1]));
+            double A = ai / _h;
+            double B = ai1 / _h;
+            double C = (ai + ai1) / _h + (_h / _t);
+            double F = _h / _t * V0[1];
+            F += A * pow(sigma * cc * cc / kappa * currentTime, 1.0 / sigma);  // Left boundary value
+            //F += A * u0 * pow(currentTime, 1.0 / sigma);
+            tridiagonalArgument[0][1] = -C;
+            tridiagonalArgument[0][2] = B;
+            tridiagonalArgument[0][3] = -F;
+            for (int j = 1; j < N - 1; ++j) {
+                ai = 0.5 * (K2(bufferLayer[j + 1]) + K2(bufferLayer[j]));
+                ai1 = 0.5 * (K2(bufferLayer[j + 2]) + K2(bufferLayer[j + 1]));
+                A = ai / _h;
+                B = ai1 / _h;
+                C = (ai + ai1) / _h + _h / _t;
+                F = _h / _t * V0[j + 1];
+                if (j == N - 2) {
+                    tridiagonalArgument[j][0] = A;
+                    tridiagonalArgument[j][1] = -C;
+                    tridiagonalArgument[j][3] = -F;
+                    break;
+                }
+                tridiagonalArgument[j][0] = A;
+                tridiagonalArgument[j][1] = -C;
+                tridiagonalArgument[j][2] = B;
+                tridiagonalArgument[j][3] = -F;
+            }
+            // Solving with tridiagonal method
+            vector<double> nextLayer = tridiagonalLinearSolve(tridiagonalArgument);
+            bufferLayer[0] = u0 * pow(currentTime, 1.0 / sigma);;
+            for (int k = 1; k <= bufferLayer.size() - 2; ++k) {
+                bufferLayer[k] = nextLayer[k - 1];
+            }
+            bufferLayer[bufferLayer.size() - 1] = 0.0;
+            // Real solution
+            vector<double> realSol;
+            for (int k = 0; k < visualN; ++k) {
+                realSol.push_back(exactQuasi(k * _h, currentTime));
+            }
+            // Approximation calculating
+            double max = -1.0;
+            for (int k = 0; k < visualN; ++k) {
+                double diff = fabs(bufferLayer[k] - realSol[k]);
+                if (diff > max) {
+                    max = diff;
+                }
+            }
+            if (max <= eps || iterations == M) {
+                break;
+            }
+//            if (max <= eps) {
+//                cout << iterations << " iterations" << endl;
+//                break;
+//            }
+        }
+        V0 = bufferLayer;
+        vector<double> localError;
+        for (int i = 0; i < 50; ++i) {
+            localError.push_back(fabs(V0[i] - exactQuasi(i * _h, currentTime)));
+        }
+        double max = -1.0;
+        for (int i = 0; i < localError.size(); ++i) {
+            if (localError[i] > max) {
+                max = localError[i];
+            }
+        }
+        //cout << "Error with t = " << currentTime << " is " << max << endl;
+        error.push_back(max);
+        for (int i = 0; i < 50.; ++i) {
+            fOut << V0[i] << " ";
+        }
+        fOut << endl;
+    }
+    double max = -1.0;
+    for (int i = 0; i < error.size(); ++i) {
+        if (error[i] > max) {
+            max = error[i];
+        }
+    }
+    cout << "Error = " << max << endl;
+    fOut.close();
+}
+
+void exactQuasiChart(double _h, double _t, string _path) {
+    std::ofstream fOut(_path);
+    if (!fOut) {
+        cout << "Error while opening file" << endl;
+        return;
+    }
+    double L = 80;
+    double N = L / _h;
+    double T = 1;
+    double N0 = T / _t;
+    for (double i = 0; i <= T; i += _t) {
+        for (double j = 0; j <= L; j += _h) {
+            fOut << exactQuasi(j, i) << " ";
+        }
+        fOut << endl;
+    }
+    fOut.close();
+}
+
+double exactQuasi(double _x, double _t) {
+    double sigma = 2; double kappa = 0.5; double c = 5;
+    if (_x <= c * _t) {
+        return pow(sigma * c * pow(kappa, -1) * (c * _t - _x), 1.0 / sigma);
+    } else {
+        return 0.0;
+    }
+}
+
+double exactTest(double _x, double _t) {
+    return exp(-_t) * sin(_x);
 }
