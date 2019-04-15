@@ -16,7 +16,6 @@ vector<double> Mixed(vector<double> _V0, double sigma, double h, double t) {
     vector<double> FA;
     vector<double> FB;
     double A, B, C, F, a0, a1, an;
-    //int s = _V0.size() - 1;
     // Constants
     double c = 1; double ro = 1; double alpha = 2; double beta = 0.5; double gamma = 3;
     double u0 = 0.1;
@@ -168,7 +167,6 @@ void Fill(string path) {
     double h = 0.0001;
     double t = 0.12 ;
     double T = 1;
-    double N0 = T / t;
     double L = 1;
     double N = L / h;
     vector<double> V0 = mesh(N, L);
@@ -224,10 +222,8 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
     double L = 1;
     double N = L / _h;
     double T = 1;
-    double N0 = T / _t;
     // Constants
-    double c = 1; double ro = 1; double alpha = 2; double beta = 0.5; double gamma = 3;
-    double u0 = 0.1; double k1 = 1; double k2 = 0.1; double x1 = 1.0 / 3.0; double x2 = 2.0 / 3.0;
+    double c = 1; double ro = 1; double u0 = 0.1;
     int typeOfConditionLeft = 0;
     int typeOfConditionRight = 0;
     double flowLeft = 0.0; double flowRight = 0.0;
@@ -236,7 +232,7 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
     for (int i = 0; i < V0.size(); ++i) {
         double x = i * _h;
         V0[i] = u0 + x * (L - x);
-        //V0[i] = sin(x);
+        //V0[i] = sin(x);  // For error calculating
         fOut << V0[i] << " ";
     }
     fOut << endl;
@@ -404,7 +400,6 @@ vector<double> boundaryRight(int _type, double _y0, double _y1, double _h, doubl
 
 void quasilinearEquationScheme(double _h, double _t, string _path) {
     double eps = 0.8;
-    double epsZero = 1e-7;
     vector<double> error;
     int M = 1;  // Limit of internal iterations
     std::ofstream fOut(_path);
@@ -416,7 +411,6 @@ void quasilinearEquationScheme(double _h, double _t, string _path) {
     double visualL = 10;
     int visualN = visualL / _h;
     int N = L / _h;
-    //cout << "N = " << N << endl;
     double T = 1;
     double N0 = T / _t;
     // Constants
@@ -426,7 +420,6 @@ void quasilinearEquationScheme(double _h, double _t, string _path) {
     vector<double> V0 = mesh(N, L);
     for (int i = 0; i < V0.size(); ++i) {
         V0[i] = 0.0;
-//        fOut << V0[i] << " ";
     }
     for (int i = 0; i < visualN; ++i) {
         fOut << V0[i] << " ";
@@ -449,7 +442,6 @@ void quasilinearEquationScheme(double _h, double _t, string _path) {
             double C = (ai + ai1) / _h + (_h / _t);
             double F = _h / _t * V0[1];
             F += A * pow(sigma * cc * cc / kappa * currentTime, 1.0 / sigma);  // Left boundary value
-            //F += A * u0 * pow(currentTime, 1.0 / sigma);
             tridiagonalArgument[0][1] = -C;
             tridiagonalArgument[0][2] = B;
             tridiagonalArgument[0][3] = -F;
@@ -510,7 +502,6 @@ void quasilinearEquationScheme(double _h, double _t, string _path) {
                 max = localError[i];
             }
         }
-        //cout << "Error with t = " << currentTime << " is " << max << endl;
         error.push_back(max);
         for (int i = 0; i < 50.; ++i) {
             fOut << V0[i] << " ";
@@ -534,9 +525,7 @@ void exactQuasiChart(double _h, double _t, string _path) {
         return;
     }
     double L = 80;
-    double N = L / _h;
     double T = 1;
-    double N0 = T / _t;
     for (double i = 0; i <= T; i += _t) {
         for (double j = 0; j <= L; j += _h) {
             fOut << exactQuasi(j, i) << " ";
