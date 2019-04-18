@@ -139,7 +139,7 @@ void explicitScheme(double _t, double _h) {
 }
 
 double K1(double _x, double _L) {
-    double k1 = 1; double k2 = 1; double x1 = 1.0 / 3.0; double x2 = 2.0 / 3.0;
+    double k1 = 1; double k2 = 0.1; double x1 = 1.0 / 3.0; double x2 = 2.0 / 3.0;
     if (_x >= 0 && _x <= x1) {
         return k1;
     } else if (_x > x1 && _x < x2) {
@@ -228,7 +228,7 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
     // Constants
     double c = 1; double ro = 1; double alpha = 2; double beta = 0.5; double gamma = 3;
     double u0 = 0.1; double k1 = 1; double k2 = 0.1; double x1 = 1.0 / 3.0; double x2 = 2.0 / 3.0;
-    int typeOfConditionLeft = 0;
+    int typeOfConditionLeft = 1;
     int typeOfConditionRight = 0;
     double flowLeft = 0.0; double flowRight = 0.0;
     // First time layer
@@ -339,6 +339,7 @@ void mixedScheme(double _sigma, double _h, double _t, string _path) {
                 cout << "Exception in right border" << endl;
                 break;
         }
+        //cout << "Square = " << Trap(V0, _h) << endl;
         fOut << V0[0] << " ";
         for (int i = 1; i <= V0.size() - 2; ++i) {
             V0[i] = nextLayer[i - 1];
@@ -557,4 +558,12 @@ double exactQuasi(double _x, double _t) {
 
 double exactTest(double _x, double _t) {
     return exp(-_t) * sin(_x);
+}
+
+double Trap(vector<double> _src, double _h) {
+    double result = 0.0;
+    for(int i = 1; i < _src.size(); ++i) {
+        result += 0.5 * (_src[i] + _src[i - 1]) * _h;
+    }
+    return result;
 }

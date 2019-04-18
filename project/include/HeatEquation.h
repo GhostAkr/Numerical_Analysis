@@ -39,5 +39,6 @@ vector<double> tridiagonalLinearSolve(const vector<vector<double>> _matrix);
 double exactQuasi(double _x, double _t);
 double exactTest(double _x, double _t);
 void exactQuasiChart(double _h, double _t, string _path);
+double Trap(vector<double> _src, double _h);
 
 #endif //NUMERICAL_ANALYSIS_HEATEQUATION_H
