@@ -31,11 +31,11 @@ void crossScheme(double _t, double _h, string _path, int _testNum) {
 //        cout << "x0 = " << x << endl;
         V0[i] = zeroFunction(x, _testNum);
         cout << i * _h << endl;
-        if (fabs(i * _h - 1) < 1e-5) {
-            cout << "qq" << endl;
-            V0[i] = 0.0;
-        }
-        cout << "V0[i] = " << V0[i] << endl;
+//        if (fabs(i * _h - 1) < 1e-5) {
+//            cout << "qq" << endl;
+//            V0[i] = 0.0;
+//        }
+//        cout << "V0[i] = " << V0[i] << endl;
 //        if (fabs(V0[i] - V0[i - 1]) > 1e-1) {
 //            V0[i] = fabs(V0[i] - V0[i - 1]) / 2.0;
 //        }
@@ -54,9 +54,9 @@ void crossScheme(double _t, double _h, string _path, int _testNum) {
     for (int i = 1; i < V1.size() - 1; ++i) {
         double x = i * _h;
         V1[i] = V0[i] + _t * gFunction(x, _testNum) + (a * a * _t * _t / 2.0) * zeroDerivative(x, _testNum);
-        if (fabs(i * _h - 1) < 1e-5) {
-            V1[i] = 0.0;
-        }
+//        if (fabs(i * _h - 1) < 1e-5) {
+//            V1[i] = 0.0;
+//        }
 //        if (fabs(V1[i] - V1[i - 1]) > 1e-1) {
 //            V1[i] = fabs(V1[i] - V1[i - 1]) / 2.0;
 //        }
@@ -77,9 +77,9 @@ void crossScheme(double _t, double _h, string _path, int _testNum) {
         for (int n = 1; n < nextLayer.size() - 1; ++n) {
             nextLayer[n] = 2 * V1[n] - V0[n] + courantNumberSqr * (V1[n + 1] - 2 * V1[n] + V1[n - 1]);
             //cout << "n = " << n << endl;
-            if (fabs(n * _h - 1) < 1e-5) {
-                nextLayer[n] = 0.0;
-            }
+//            if (fabs(n * _h - 1) < 1e-5) {
+//                nextLayer[n] = 0.0;
+//            }
 //            if (fabs(nextLayer[n] - nextLayer[n - 1]) > 1e-1) {
 //                nextLayer[n] = fabs(nextLayer[n] - nextLayer[n - 1]) / 2.0;
 //            }
