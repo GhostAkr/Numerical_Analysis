@@ -12,7 +12,7 @@ void crossScheme(double _t, double _h, string _path, int _testNum) {
         return;
     }
     // Constants and parameters
-    double L = 2;
+    double L = 1;
     double N = L / _h;
     double T = 10;
     double a = 1.0;
@@ -145,7 +145,7 @@ double exactSolution(double _t, double _x, int _testNum) {
         case 1:
             return sin(Pi * _x) * cos(Pi * _t);
         case 2: {
-            double eps = 1e-7;
+            double eps = 1e-8;
             double k = 0.5 * (sqrt(2.0 / (Pi * Pi * eps)) - 1);
             double sum = 0.0;
             for (int n = 0; n <= k; ++n) {
@@ -157,7 +157,7 @@ double exactSolution(double _t, double _x, int _testNum) {
             return -1.0;
         }
         default: {
-            cout << "Exception in psiFunction" << endl;
+            cout << "Exception in exactSolution" << endl;
             return -1.0;
         }
     }
