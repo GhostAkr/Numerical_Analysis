@@ -3,8 +3,8 @@
 
 int main() {
     string path = "../data/waveOut.dat";
-    double t = 0.025;
-    double h = 0.05;
-    crossScheme(t, h, path, 2);
+    double t = 0.000625;
+    double h = 0.005;
+    crossScheme(t, h, path, 4);
     return 0;
 }

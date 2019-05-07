@@ -74,76 +74,117 @@ double zeroFunction(double _x, int _testNum) {
         case 1: {
             return sin(Pi * _x);
         }
-        case 2:
+        case 2: {
             return _x * (1.0 - _x);
-        case 3:
+        }
+        case 3: {
             return _x * (_x + 1.0);
-        default:
+        }
+        case 4: {
+            if (_x < 0.4) {
+                return 0;
+            } else if (_x >= 0.4 && _x <= 0.6) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+        default: {
             cout << "Exception in zeroFunction" << endl;
             return -1.0;
+        }
     }
 }
 
 double gFunction(double _x, int _testNum) {
     switch (_testNum) {
-        case 1:
+        case 1: {
             return 0;
-        case 2:
+        }
+        case 2: {
             return 0;
-        case 3:
+        }
+        case 3: {
             return cos(_x);
-        default:
+        }
+        case 4: {
+            return 0;
+        }
+        default: {
             cout << "Exception in gFunction" << endl;
             return -1.0;
+        }
     }
 }
 
 double phiFunction(double _t, int _testNum){
     switch (_testNum) {
-        case 1:
+        case 1: {
             return 0;
-        case 2:
+        }
+        case 2: {
             return 0;
-        case 3:
+        }
+        case 3: {
             return 0;
-        default:
+        }
+        case 4: {
+            return 0;
+        }
+        default: {
             cout << "Exception in phiFunction" << endl;
             return -1.0;
+        }
     }
 }
 
 double psiFunction(double _t, int _testNum) {
     switch (_testNum) {
-        case 1:
+        case 1: {
             return 0;
-        case 2:
+        }
+        case 2: {
             return 0;
-        case 3:
+        }
+        case 3: {
             return 2.0 * (_t + 1.0);
-        default:
+        }
+        case 4: {
+            return 0;
+        }
+        default: {
             cout << "Exception in psiFunction" << endl;
             return -1.0;
+        }
     }
 }
 
 double zeroDerivative(double _x, int _testNum) {
     switch (_testNum) {
-        case 1:
+        case 1: {
             return -Pi * Pi * sin(Pi * _x);
-        case 2:
+        }
+        case 2: {
             return -2.0;
-        case 3:
+        }
+        case 3: {
             return 2.0;
-        default:
+        }
+        case 4: {
+            return 0;
+        }
+        default: {
             cout << "Exception in zeroDerivative" << endl;
             return -1.0;
+        }
     }
 }
 
 double exactSolution(double _t, double _x, int _testNum) {
     switch (_testNum) {
-        case 1:
+        case 1: {
             return sin(Pi * _x) * cos(Pi * _t);
+        }
         case 2: {
             double eps = 1e-8;
             double k = 0.5 * (sqrt(2.0 / (Pi * Pi * eps)) - 1);
@@ -154,6 +195,9 @@ double exactSolution(double _t, double _x, int _testNum) {
             return 8.0 / pow(Pi, 3) * sum;
         }
         case 3: {
+            return -1.0;
+        }
+        case 4: {
             return -1.0;
         }
         default: {
