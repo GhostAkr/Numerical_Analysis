@@ -5,11 +5,15 @@
 #ifndef NUMERICAL_ANALYSIS_POISSONEQUATION_H
 #define NUMERICAL_ANALYSIS_POISSONEQUATION_H
 
+#include "../include/OrdinaryDE.h"
+
 #include <iostream>
+#include <vector>
 
 using std::cout;
 using std::endl;
+using std::vector;
 
-void test();
+vector<vector<double>> mesh2D(double _L1, double _L2, double _h1, double _h2);
 
 #endif //NUMERICAL_ANALYSIS_POISSONEQUATION_H
