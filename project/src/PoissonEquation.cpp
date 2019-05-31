@@ -141,7 +141,7 @@ vector<double> border1(double _x2, int _testNum) {
         }
         case 3: {
             result[0] = 0;
-            result[1] = 2.0;
+            result[1] = -2.0;
             result[2] = 1.0;
             return result;
         }
@@ -162,7 +162,7 @@ vector<double> border2(double _x1, int _testNum) {
             return result;
         }
         case 2: {
-            result[0] = -1.0;
+            result[0] = 1.0;
             result[1] = 1.0;
             result[2] = 1.0;
             return result;
@@ -228,7 +228,7 @@ void switchDirectionsScheme(string _path, double _t, double _h1, double _h2, int
     fOut << endl;
     // Main algorithm
     double currentTime = 0;
-    while (currentTime <= T) {
+    while (true) {
         vector<vector<double>> buffHalfLayer = mesh2D(L[0], L[1], _h1, _h2);
         // First system
         for (int j = 1; j < N2 - 1; ++j) {
@@ -357,6 +357,7 @@ void switchDirectionsScheme(string _path, double _t, double _h1, double _h2, int
                 buffSecondHalfLayer[buffSecondHalfLayer.size() - 1][j] = borders[1];
             }
         }
+        int isContinue = compareLayers(buffLayer, buffSecondHalfLayer, _t);
         buffLayer = buffSecondHalfLayer;
         for (int i = 0; i < buffLayer.size(); ++i) {
             for (int j = 0; j < buffLayer[0].size(); ++j) {
@@ -365,17 +366,44 @@ void switchDirectionsScheme(string _path, double _t, double _h1, double _h2, int
         }
         fOut << endl;
         currentTime += _t;
+        if (isContinue) {
+            break;
+        }
     }
+    cout << "Time = " << currentTime << endl;
     double max = -1.0;
     for (int i = 0; i < buffLayer.size(); ++i) {
         for (int j = 0; j < buffLayer[0].size(); ++j) {
             double diff = fabs(buffLayer[i][j] - exactSolutionPois(i * _h1, j * _h2, _testNum));
-            cout << "Diff on [i][j] = " << "[" << i << "][" << j << "] = " << diff << endl;
+//            cout << "Diff on [i][j] = " << "[" << i << "][" << j << "] = " << diff << endl;
             if (diff > max) {
                 max = diff;
             }
         }
     }
+
     cout << "Error = " << max << endl;
     fOut.close();
+}
+
+int compareLayers(vector<vector<double>> _previous, vector<vector<double>> _next, double _t) {
+    if (_previous.size() != _next.size() || _previous[0].size() != _next.size()) {
+        cout << "Exception in compareLayers" << endl;
+        return -1;
+    }
+    double max = 0.0;
+    double eps = 1e-5;
+    for (int i = 0; i < _previous.size(); ++i) {
+        for (int j = 0; j < _next.size(); ++j) {
+            double diff = fabs(_previous[i][j] - _next[i][j]);
+            if (diff > max) {
+                max = diff;
+            }
+        }
+    }
+    if (max < _t * eps) {
+        return 1;
+    } else {
+        return 0;
+    }
 }

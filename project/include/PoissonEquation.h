@@ -36,5 +36,6 @@ double F1(vector<vector<double>> _layer, int _i, int _j, double _t, int _testNum
 
 // Other
 vector<vector<double>> mesh2D(double _L1, double _L2, double _h1, double _h2);
+int compareLayers(vector<vector<double>> _previous, vector<vector<double>> _next, double _t);
 
 #endif //NUMERICAL_ANALYSIS_POISSONEQUATION_H
