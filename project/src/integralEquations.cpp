@@ -94,8 +94,8 @@ void simpleMethod(int _testNum, int _limitType, int _N, string _path) {
     double a = limitsInt[0];
     double b = limitsInt[1];
     double h = (b - a) / _N;
-    vector<double> solution (_N, 1);
-    vector<double> buffSolution (_N, 0);
+    vector<double> solution (_N + 1, 1);
+    vector<double> buffSolution (_N + 1, 0);
     int iterations = 0;
     while (true) {
         iterations++;
