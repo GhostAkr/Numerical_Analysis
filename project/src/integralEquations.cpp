@@ -84,3 +84,65 @@ void quadMethod(int _testNum, int _limitType, int _N, string _path) {
     }
     fOut.close();
 }
+
+void simpleMethod(int _testNum, int _limitType, int _N, string _path) {
+    vector<double> limitsInt = limits(_limitType);
+    double a = limitsInt[0];
+    double b = limitsInt[1];
+    double h = (b - a) / _N;
+    vector<double> solution (_N, 1);
+    vector<double> buffSolution (_N, 0);
+    int iterations = 0;
+    while (true) {
+        iterations++;
+        for (int i = 0; i < solution.size(); ++i) {
+            double x = a + i * h;
+            double sum = 0.0;
+            for (int k = 0; k < solution.size(); ++k) {
+                double s = a + k * h;
+                if (k == 0) {
+                    sum += 0.25 * core(x, s, _testNum) * h * solution[k];
+                    continue;
+                }
+                if (k == solution.size() - 1) {
+                    sum += 0.25 * core(x, s, _testNum) * h * solution[k];
+                    continue;
+                }
+                sum += 0.5 * core(x, s, _testNum) * h * solution[k];
+            }
+            buffSolution[i] = rightPart(x, _testNum) + sum;
+        }
+        solution = buffSolution;
+        if (iterations == 50) {
+            break;
+        }
+    }
+    // Writing to file
+    std::ofstream fOut(_path);
+    if (!fOut) {
+        cout << "Error while opening file" << endl;
+        return;
+    }
+    for (int i = 0; i < solution.size(); ++i) {
+        fOut << a + i * h << " " << solution[i] << endl;
+    }
+    fOut.close();
+}
+
+double phi(double _x, int _i) {
+    if (_i == 1) {
+        return 1.0 - _x;
+    }
+    return pow(_x, 2 * _i - 1);
+}
+
+double psi(double _s, int _i) {
+    if (_i == 1) {
+        return 1.0;
+    }
+    double fact = 1.0;
+    for (int j = 1; j <= 2 * _i - 2; ++j) {
+        fact *= j;
+    }
+    return pow(_s, 2 * _i - 2) / fact;
+}

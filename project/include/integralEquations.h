@@ -20,5 +20,11 @@ vector<double> limits(int _limitType);
 
 // Methods
 void quadMethod(int _testNum, int _limitType, int _N, string _path);
+void simpleMethod(int _testNum, int _limitType, int _N, string _path);
+void degenMethod(int _testNum, int _limitType, int _N, string _path);
+
+// Core decomposition
+double phi(double _x, int _i);
+double psi(double _s, int _i);
 
 #endif //NUMERICAL_ANALYSIS_INTEGRALEQUATIONS_H

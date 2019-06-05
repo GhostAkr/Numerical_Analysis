@@ -7,6 +7,7 @@ int main() {
     int limitType = 1;
     int N = 10;
     string path = "../data/outIntegral.dat";
-    quadMethod(testNum, limitType, N, path);
+    //quadMethod(testNum, limitType, N, path);
+    simpleMethod(testNum, limitType, N, path);
     return 0;
 }
