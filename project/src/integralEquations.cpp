@@ -48,4 +48,39 @@ vector<double> limits(int _limitType) {
     }
 }
 
-
+void quadMethod(int _testNum, int _limitType, int _N, string _path) {
+    vector<double> limitsInt = limits(_limitType);
+    double a = limitsInt[0];
+    double b = limitsInt[1];
+    double h = (b - a) / _N;
+    // Creating and solving of linear system
+    vector<vector<double>> equation (_N + 1, vector<double> (_N + 2, 0));
+    for (int i = 0; i < equation.size(); ++i) {
+        double x = a + h * i;
+        for (int k = 0; k < equation[0].size() - 1; ++k) {
+            double s = a + h * k;
+            if (k == 0) {
+                equation[i][k] = -0.25 * core(x, s, _testNum) * h;
+                continue;
+            }
+            if (k == equation[0].size() - 2) {
+                equation[i][k] = -0.25 * core(x, s, _testNum) * h;
+                continue;
+            }
+            equation[i][k] = -0.5 * core(x, s, _testNum) * h;
+        }
+        equation[i][i] += 1.0;
+        equation[i][equation[0].size() - 1] = rightPart(x, _testNum);
+    }
+    vector<double> solution = gaussLinearSolve(equation);
+    // Writing to file
+    std::ofstream fOut(_path);
+    if (!fOut) {
+        cout << "Error while opening file" << endl;
+        return;
+    }
+    for (int i = 0; i < solution.size(); ++i) {
+        fOut << a + i * h << " " << solution[i] << endl;
+    }
+    fOut.close();
+}
