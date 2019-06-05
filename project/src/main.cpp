@@ -8,7 +8,7 @@ int main() {
     int N = 10;
     string path = "../data/outIntegral.dat";
     //quadMethod(testNum, limitType, N, path);
-    simpleMethod(testNum, limitType, N, path);
-    //degenMethod(testNum, limitType, N, path);
+    //simpleMethod(testNum, limitType, N, path);
+    degenMethod(testNum, limitType, N, path);
     return 0;
 }

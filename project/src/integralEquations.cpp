@@ -161,30 +161,32 @@ void degenMethod(int _testNum, int _limitType, int _N, string _path) {
     // Coefficients calculating
     vector<vector<double>> equationC (m, vector<double> (m + 1, 0));
     for (int i = 1; i <= m; ++i) {
+        // beta calculation
         double beta = 0.0;
-        for (int k = 1; k<= m; ++k) {
-            if (k== 1) {
-                beta += 0.5 * hm * psi(a + hm * k, i) * rightPart(a + hm * k, _testNum);
+        for (int k = 0; k < _N + 1; ++k) {
+            if (k == 0) {
+                beta += 0.5 * h * psi(a + h * k, i) * rightPart(a + h * k, _testNum);
                 continue;
             }
-            if (k== m) {
-                beta += 0.5 * hm * psi(a + hm * k, i) * rightPart(a + hm * k, _testNum);
+            if (k == _N) {
+                beta += 0.5 * h * psi(a + h * k, i) * rightPart(a + h * k, _testNum);
                 continue;
             }
-            beta += hm * psi(a + hm * k, i) * rightPart(a + hm * k, _testNum);
+            beta += h * psi(a + h * k, i) * rightPart(a + h * k, _testNum);
         }
         for (int j = 1; j <= m; ++j) {
+            // alpha calculation
             double alpha = 0.0;
-            for (int k = 1; k <= m; ++k)  {
-                if (k == 1) {
-                    alpha += 0.5 * hm * psi(a + hm * k, i) * phi(a + hm * k, j);
+            for (int k = 0; k < _N + 1; ++k)  {
+                if (k == 0) {
+                    alpha += 0.5 * h * psi(a + h * k, i) * phi(a + h * k, j);
                     continue;
                 }
-                if (k == m - 1) {
-                    alpha += 0.5 * hm * psi(a + hm * k, i) * phi(a + hm * k, j);
+                if (k == _N) {
+                    alpha += 0.5 * h * psi(a + h * k, i) * phi(a + h * k, j);
                     continue;
                 }
-                alpha += hm * psi(a + hm * k, i) * phi(a + hm * k, j);
+                alpha += h * psi(a + h * k, i) * phi(a + h * k, j);
             }
             equationC[i - 1][j - 1] = -0.5 * alpha;
         }
@@ -192,7 +194,7 @@ void degenMethod(int _testNum, int _limitType, int _N, string _path) {
         equationC[i - 1][i - 1] += 1.0;
     }
     vector<double> solveC = gaussLinearSolve(equationC);
-    vector<double> solution (_N, 0);
+    vector<double> solution (_N + 1, 0);
     for (int i = 0; i < solution.size(); ++i) {
         double sum = 0.0;
         for (int k = 1; k <= m; ++k) {
