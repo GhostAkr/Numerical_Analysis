@@ -45,6 +45,10 @@ vector<double> limits(int _limitType) {
             result[1] = 1.0;
             return result;
         }
+        default: {
+            cout << "Exception in limits" << endl;
+            return {};
+        }
     }
 }
 
@@ -145,4 +149,65 @@ double psi(double _s, int _i) {
         fact *= j;
     }
     return pow(_s, 2 * _i - 2) / fact;
+}
+
+void degenMethod(int _testNum, int _limitType, int _N, string _path) {
+    vector<double> limitsInt = limits(_limitType);
+    double a = limitsInt[0];
+    double b = limitsInt[1];
+    double h = (b - a) / _N;
+    int m = 5;
+    double hm = (b - a) / (m - 1);
+    // Coefficients calculating
+    vector<vector<double>> equationC (m, vector<double> (m + 1, 0));
+    for (int i = 1; i <= m; ++i) {
+        double beta = 0.0;
+        for (int k = 1; k<= m; ++k) {
+            if (k== 1) {
+                beta += 0.5 * hm * psi(a + hm * k, i) * rightPart(a + hm * k, _testNum);
+                continue;
+            }
+            if (k== m) {
+                beta += 0.5 * hm * psi(a + hm * k, i) * rightPart(a + hm * k, _testNum);
+                continue;
+            }
+            beta += hm * psi(a + hm * k, i) * rightPart(a + hm * k, _testNum);
+        }
+        for (int j = 1; j <= m; ++j) {
+            double alpha = 0.0;
+            for (int k = 1; k <= m; ++k)  {
+                if (k == 1) {
+                    alpha += 0.5 * hm * psi(a + hm * k, i) * phi(a + hm * k, j);
+                    continue;
+                }
+                if (k == m - 1) {
+                    alpha += 0.5 * hm * psi(a + hm * k, i) * phi(a + hm * k, j);
+                    continue;
+                }
+                alpha += hm * psi(a + hm * k, i) * phi(a + hm * k, j);
+            }
+            equationC[i - 1][j - 1] = -0.5 * alpha;
+        }
+        equationC[i - 1][m] = beta;
+        equationC[i - 1][i - 1] += 1.0;
+    }
+    vector<double> solveC = gaussLinearSolve(equationC);
+    vector<double> solution (_N, 0);
+    for (int i = 0; i < solution.size(); ++i) {
+        double sum = 0.0;
+        for (int k = 1; k <= m; ++k) {
+            sum += solveC[i - 1] * phi(a + i * h, k);
+        }
+        solution[i] = rightPart(a + i * h, _testNum) + 0.5 * sum;
+    }
+    // Writing to file
+    std::ofstream fOut(_path);
+    if (!fOut) {
+        cout << "Error while opening file" << endl;
+        return;
+    }
+    for (int i = 0; i < solution.size(); ++i) {
+        fOut << a + i * h << " " << solution[i] << endl;
+    }
+    fOut.close();
 }
