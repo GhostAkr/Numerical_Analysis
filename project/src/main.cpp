@@ -1,14 +1,12 @@
-#include "../include/PoissonEquation.h"
+#include "../include/integralEquations.h"
+
 #include <iostream>
 
 int main() {
-    string path = "../data/outPoisson.dat";
-    double t = 0.05;
-    double h1 = 0.05;
-    double h2 = 0.05;
-    cout << "h1 = " << h1 << endl;
-    cout << "h2 = " << h2 << endl;
-    int testNum = 2;
-    switchDirectionsScheme(path, t, h1, h2, testNum);
+    int testNum = 1;
+    int limitType = 1;
+    int N = 10;
+    string path = "../data/outIntegral.dat";
+    quadMethod(testNum, limitType, N, path);
     return 0;
 }
