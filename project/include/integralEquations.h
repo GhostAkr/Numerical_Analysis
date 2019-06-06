@@ -27,4 +27,9 @@ void degenMethod(int _testNum, int _limitType, int _N, string _path);
 double phi(double _x, int _i);
 double psi(double _s, int _i);
 
+vector<vector<double>>kMesh(int n);
+vector<vector<double>>cMesh(int n);
+vector<double>Qker(vector<double> k, vector<double> c);
+void SIE(string _path, int n);
+
 #endif //NUMERICAL_ANALYSIS_INTEGRALEQUATIONS_H

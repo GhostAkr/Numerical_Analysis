@@ -3,6 +3,7 @@
 //
 
 #include "../include/integralEquations.h"
+#define pi 3.14159265358979
 
 double core(double _x, double _s, int _testNum) {
     switch (_testNum) {
@@ -210,6 +211,79 @@ void degenMethod(int _testNum, int _limitType, int _N, string _path) {
     }
     for (int i = 0; i < solution.size(); ++i) {
         fOut << a + i * h << " " << solution[i] << endl;
+    }
+    fOut.close();
+}
+
+vector<vector<double>>kMesh(int n) {
+    vector<vector<double>> result(n, vector<double>(2, 0));
+    for (int i = 0; i < result.size(); ++i) {
+
+        result[i][0] = cos(2 * pi * (i - 0.5) / n);
+        result[i][1] = sin(2 * pi * (i - 0.5) / n);
+    }
+    return result;
+}
+
+vector<vector<double>>cMesh(int n) {
+    vector<vector<double>> result(n, vector<double>(2, 0));
+    for (int i = 0; i < result.size(); ++i) {
+        result[i][0] = cos(2 * pi * (i - 1) / n);
+        result[i][1] = sin(2 * pi * (i - 1) / n);
+    }
+    return result;
+}
+
+
+vector<double>Qker(vector<double> k, vector<double> c) {
+    vector<double> result(2, 0);
+    double r;
+    //cout << "Test" << endl;
+    r = 2 * pi * ((k[0] - c[0]) * (k[0] - c[0]) + (k[1] - c[1]) * (k[1] - c[1]));
+    //cout << r << endl;
+//    cout << "k[1] = " << k[1] << endl;
+//    cout << "k[0] = " << k[0] << endl;
+    result[0] = -(k[1]-c[1])/r;
+    result[1] = (k[0] - c[0])/r;
+
+    return result;
+}
+
+void SIE(string _path, int n) {
+    std::ofstream fOut(_path);
+    if (!fOut) {
+        cout << "Error while opening file" << endl;
+        return;
+    }
+    double dl = 2 * pi / n;
+    vector<vector<double>> k = kMesh(n); // массив к совпадает с массивом нормалей
+    vector<vector<double>> c = cMesh(n);
+//    cout << "k" << endl;
+//    matrixPrint(k);
+//    cout << "c" << endl;
+//    matrixPrint(c);
+    vector<vector<double>> M(n + 1, vector<double>(n + 2, 1));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            vector<double> tmp = Qker(k[i], c[j]);
+//            cout << "tmp[0] = " << tmp[0] << endl;
+//            cout << "tmp[1] = " << tmp[1] << endl;
+            //cout << "R" << endl;
+            M[i][j] = dl * (k[i][0] * tmp[0] + k[i][1] * tmp[1]);
+        }
+    }
+    for (int i = 0; i < n; ++i) {
+        M[i][n + 1] = k[i][1];
+    }
+    for (int i = 0; i < M[0].size() - 1; ++i) {
+        M[M.size() - 1][i] = dl;
+    }
+    M[M.size() - 1][M[0].size() - 1] = 0;
+    matrixPrint(M);
+    vector<double> solution = gaussLinearSolve(M);
+    //vectorPrint(solution);
+    for (int i = 0; i < solution.size() - 1; ++i) {
+        fOut << c[i][0] << " " << c[i][1] << " " << solution[i] << endl;
     }
     fOut.close();
 }
