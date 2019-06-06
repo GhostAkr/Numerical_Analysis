@@ -78,6 +78,14 @@ void quadMethod(int _testNum, int _limitType, int _N, string _path) {
         equation[i][equation[0].size() - 1] = rightPart(x, _testNum);
     }
     vector<double> solution = gaussLinearSolve(equation);
+    double max = -1.0;
+    for (int i = 0; i < solution.size(); ++i) {
+        double diff = fabs(solution[i] - 1.0);
+        if (diff > max) {
+            max = diff;
+        }
+    }
+    cout << "Error = " << max << endl;
     // Writing to file
     std::ofstream fOut(_path);
     if (!fOut) {
@@ -136,84 +144,93 @@ void simpleMethod(int _testNum, int _limitType, int _N, string _path) {
 
 double phi(double _x, int _i) {
     if (_i == 1) {
-        return 1.0 - _x;
+        return (1.0 - _x) / 2.0;
     }
-    return pow(_x, 2 * _i - 1);
+    double fact = 1.0;
+    for (int j = 1; j <= 2 * _i - 2; ++j) {
+        fact *= j;
+    }
+    return pow(-1, _i) * pow(_x, 2 * _i - 1) / fact / 2.0;
 }
 
 double psi(double _s, int _i) {
     if (_i == 1) {
         return 1.0;
     }
-    double fact = 1.0;
-    for (int j = 1; j <= 2 * _i - 2; ++j) {
-        fact *= j;
-    }
-    return pow(_s, 2 * _i - 2) / fact;
+
+    return pow(_s, 2 * _i - 2);
 }
 
-void degenMethod(int _testNum, int _limitType, int _N, string _path) {
-    vector<double> limitsInt = limits(_limitType);
-    double a = limitsInt[0];
-    double b = limitsInt[1];
-    double h = (b - a) / _N;
-    int m = 5;
-    double hm = (b - a) / (m - 1);
-    // Coefficients calculating
-    vector<vector<double>> equationC (m, vector<double> (m + 1, 0));
-    for (int i = 1; i <= m; ++i) {
-        // beta calculation
-        double beta = 0.0;
-        for (int k = 0; k < _N + 1; ++k) {
-            if (k == 0) {
-                beta += 0.5 * h * psi(a + h * k, i) * rightPart(a + h * k, _testNum);
-                continue;
-            }
-            if (k == _N) {
-                beta += 0.5 * h * psi(a + h * k, i) * rightPart(a + h * k, _testNum);
-                continue;
-            }
-            beta += h * psi(a + h * k, i) * rightPart(a + h * k, _testNum);
-        }
-        for (int j = 1; j <= m; ++j) {
-            // alpha calculation
-            double alpha = 0.0;
-            for (int k = 0; k < _N + 1; ++k)  {
-                if (k == 0) {
-                    alpha += 0.5 * h * psi(a + h * k, i) * phi(a + h * k, j);
-                    continue;
-                }
-                if (k == _N) {
-                    alpha += 0.5 * h * psi(a + h * k, i) * phi(a + h * k, j);
-                    continue;
-                }
-                alpha += h * psi(a + h * k, i) * phi(a + h * k, j);
-            }
-            equationC[i - 1][j - 1] = -0.5 * alpha;
-        }
-        equationC[i - 1][m] = beta;
-        equationC[i - 1][i - 1] += 1.0;
-    }
-    vector<double> solveC = gaussLinearSolve(equationC);
-    vector<double> solution (_N + 1, 0);
-    for (int i = 0; i < solution.size(); ++i) {
-        double sum = 0.0;
-        for (int k = 1; k <= m; ++k) {
-            sum += solveC[i - 1] * phi(a + i * h, k);
-        }
-        solution[i] = rightPart(a + i * h, _testNum) + 0.5 * sum;
-    }
-    // Writing to file
-    std::ofstream fOut(_path);
-    if (!fOut) {
-        cout << "Error while opening file" << endl;
-        return;
-    }
-    for (int i = 0; i < solution.size(); ++i) {
-        fOut << a + i * h << " " << solution[i] << endl;
-    }
-    fOut.close();
-}
+//void degenMethod(int _testNum, int _limitType, int _N, string _path) {
+//    vector<double> limitsInt = limits(_limitType);
+//    double a = limitsInt[0];
+//    double b = limitsInt[1];
+//    double h = (b - a) / _N;
+//    int m = 5;
+//    double hm = (b - a) / (m - 1);
+//    // Coefficients calculating
+//    vector<vector<double>> equationC (m, vector<double> (m + 1, 0));
+//    for (int i = 1; i <= m; ++i) {
+//        // beta calculation
+//        double beta = 0.0;
+//        for (int k = 0; k < _N + 1; ++k) {
+//            double s = a + k * h;
+//            if (k == 0) {
+//                beta += 0.5 * h * psi(s, i) * rightPart(s, _testNum);
+//                continue;
+//            }
+//            if (k == _N) {
+//                beta += 0.5 * h * psi(s, i) * rightPart(s, _testNum);
+//                continue;
+//            }
+//            beta += h * psi(s, i) * rightPart(s, _testNum);
+//        }
+//        cout << "beta = " << beta << endl;
+//        for (int j = 1; j <= m; ++j) {
+//            // alpha calculation
+//            double alpha = 0.0;
+//            for (int k = 0; k < _N + 1; ++k)  {
+//                double s = a + h * k;
+//                if (k == 0) {
+//                    alpha += 0.5 * h * psi(s, i) * phi(s, j);
+//                    continue;
+//                }
+//                if (k == _N) {
+//                    alpha += 0.5 * h * psi(s, i) * phi(s, j);
+//                    continue;
+//                }
+//                alpha += h * psi(s, i) * phi(s, j);
+//            }
+//            cout << "alpha = " << alpha << endl;
+//            equationC[i - 1][j - 1] = -alpha;
+//        }
+//        equationC[i - 1][m] = beta;
+//        equationC[i - 1][i - 1] += 1.0;
+//    }
+//    vector<double> solveC = gaussLinearSolve(equationC);
+//    cout << "solveC is" << endl;
+//    vectorPrint(solveC);
+//    vector<double> solution (_N + 1, 0);
+////    cout << solveC.size() << endl;
+////    cout << solution.size() << endl;
+//    for (int i = 0; i < solution.size(); ++i) {
+//        double sum = 0.0;
+//        for (int k = 1; k <= m; ++k) {
+//            sum += solveC[i - 1] * phi(a + i * h, k);
+//        }
+//        solution[i] = rightPart(a + i * h, _testNum) + 0.5 * sum;
+//    }
+//    // Writing to file
+//    std::ofstream fOut(_path);
+//    if (!fOut) {
+//        cout << "Error while opening file" << endl;
+//        return;
+//    }
+//    for (int i = 0; i < solution.size(); ++i) {
+//        fOut << a + i * h << " " << solution[i] << endl;
+//    }
+//    fOut.close();
+//}
 
 vector<vector<double>>kMesh(int n) {
     vector<vector<double>> result(n, vector<double>(2, 0));
@@ -284,6 +301,73 @@ void SIE(string _path, int n) {
     //vectorPrint(solution);
     for (int i = 0; i < solution.size() - 1; ++i) {
         fOut << c[i][0] << " " << c[i][1] << " " << solution[i] << endl;
+    }
+    fOut.close();
+}
+
+void degenMethod(int _testNum, int _limitType, int _N, string _path) {
+    int order = 5;
+    int n = _N + 1;
+    vector<double> limitsInt = limits(_limitType);
+    double a = limitsInt[0];
+    double bq = limitsInt[1];
+    double h = (bq - a) / double(n - 1);
+//    double h = (tf - ti) / double(n-1);
+    double alpha = 0;
+    vector<double> C(n);
+    vector<double> u(n);
+    vector<double> b(order+1);
+    vector<vector<double>> M(order+1, vector<double>(order+1));
+    for (int i = 0; i < order+1; ++i)
+        for (int j = 1; j < n; ++j)
+            b[i] += (psi(a + h*(j - 1), i + 1)*rightPart(a + h*(j - 1), _testNum)
+                     + psi(a + h*j, i + 1)*rightPart(a + h*j, _testNum))*h / 2.;
+    for (int i = 0; i < b.size(); ++i) {
+        cout << b[i] << endl;
+    }
+    cout << endl;
+    for (int i = 0; i < order+1; ++i)
+        for (int j = 0; j < order+1; ++j)
+        {
+            for (int k = 1; k < n; ++k)
+                alpha += (psi(a + h*(k - 1), i + 1)*phi(a + h*(k - 1), j + 1)
+                          + psi(a + h*k, i + 1)*phi(a + h*k, j + 1))*h / 2.;
+            if (i == j)
+                M[i][j] = 1 - alpha;
+            else
+                M[i][j] = -alpha;
+            alpha = 0;
+        }
+    for (int i = 0; i < M.size(); ++i) {
+        M[i].push_back(b[i]);
+    }
+    C = gaussLinearSolve(M);
+    cout << "C is" << endl;
+    for (int i = 0; i < C.size(); ++i) {
+        cout << C[i] << endl;
+    }
+    cout << endl;
+    for (int i = 0; i < n; ++i)
+    {
+        for (int j = 0; j < order+1; ++j)
+            alpha += C[j] * phi(a + h*i, j + 1);
+        cout << "alpha = " << alpha << endl;
+        u[i] = rightPart(a + i*h, _testNum) + alpha;
+        alpha = 0;
+    }
+    cout << "u is" << endl;
+    for (int i = 0; i < u.size(); ++i) {
+        cout << u[i] << endl;
+    }
+    cout << endl;
+    // Writing to file
+    std::ofstream fOut(_path);
+    if (!fOut) {
+        cout << "Error while opening file" << endl;
+        return;
+    }
+    for (int i = 0; i < u.size(); ++i) {
+        fOut << a + i * h << " " << u[i] << endl;
     }
     fOut.close();
 }
